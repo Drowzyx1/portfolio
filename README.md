@@ -1,59 +1,58 @@
-# Portfolio
+# Carlos Martinez — Portfolio
 
-Personal portfolio built with Next.js + TypeScript + Tailwind, with an AI
-guide chatbot (Claude API) layered on top of normal manual navigation.
+Personal portfolio site with an AI guide chatbot built on the Claude API —
+visitors can browse projects and experience the normal way, or just ask the
+chatbot questions and let it navigate them to the right page.
 
-## Structure
+**Contact:** carlose082002@gmail.com · [LinkedIn](https://www.linkedin.com/in/carlosemartinez1/) · [GitHub](https://github.com/Drowzyx1)
 
-- `src/content/profile.ts` — your bio, skills, and work experience. **Edit this first.**
-- `src/content/projects.ts` — your projects. **Edit this too.** Same data
-  powers the `/projects` pages and the chatbot's knowledge.
-- `src/app/` — pages: home, `/projects`, `/projects/[slug]`, `/about`.
-- `src/app/api/chat/route.ts` — server-side API route that calls the Claude
-  API. Your API key never reaches the browser.
-- `src/lib/chatContext.ts` — builds the chatbot's system prompt from the
-  content files above.
-- `src/components/chat/ChatWidget.tsx` — the floating chat UI. The bot can
-  call a `navigate_to_project` tool, which the widget uses to route the
-  visitor to the right project page.
+## What's interesting here
 
-The chatbot is additive — every page also works with it closed, via the
-normal nav bar.
+The standout feature is the AI guide chatbot (`src/components/chat/`): it's
+given tool-calling access to a `navigate_to_project` function, so instead of
+just describing a project in text, it can surface a clickable preview card
+for the right page mid-conversation. The bot's entire knowledge base is
+generated from the same content files (`src/content/profile.ts`,
+`src/content/projects.ts`) that drive the human-facing pages, so there's one
+source of truth instead of a chatbot FAQ that drifts out of sync with the
+actual site. The API key stays server-side via a dedicated `/api/chat`
+route and never reaches the browser.
 
-## Getting started
+The site itself is content-driven: every project on `/projects` and its
+detail page, plus the featured grid on the home page, is generated from a
+single typed array in `projects.ts`. Adding a project is a data change, not
+a code change.
 
-1. Fill in `src/content/profile.ts` and `src/content/projects.ts` with your
-   real information.
-2. Copy the env example and add your key:
+## Tech stack
 
-   ```bash
-   cp .env.local.example .env.local
-   ```
+Next.js (App Router) · TypeScript · Tailwind CSS · Claude API (Anthropic) — tool use / function calling
 
-   Get an API key from [console.anthropic.com](https://console.anthropic.com/settings/keys),
-   and paste it into `.env.local` as `ANTHROPIC_API_KEY`.
+## Project structure
 
-3. Run the dev server:
+- `src/content/profile.ts` — bio, skills, education, experience
+- `src/content/projects.ts` — project data; powers `/projects`, `/projects/[slug]`, and the chatbot
+- `src/app/` — pages: home, `/projects`, `/projects/[slug]`, `/about`
+- `src/app/api/chat/route.ts` — server-side Claude API route
+- `src/lib/chatContext.ts` — builds the chatbot's system prompt from the content files
+- `src/components/chat/` — the chat widget UI and its tool-calling logic
 
-   ```bash
-   npm run dev
-   ```
+## Running it locally
 
-   Open [http://localhost:3000](http://localhost:3000).
+```bash
+git clone https://github.com/Drowzyx1/portfolio.git
+cd portfolio
+npm install
+cp .env.local.example .env.local   # add your own ANTHROPIC_API_KEY
+npm run dev
+```
 
-## Deploying to Vercel
+Open [http://localhost:3000](http://localhost:3000).
 
-1. Push this repo to GitHub.
-2. Import it at [vercel.com/new](https://vercel.com/new).
-3. In the Vercel project's Environment Variables settings, add
-   `ANTHROPIC_API_KEY` with your key. It's never committed to git.
-4. Deploy. Every push to `main` will redeploy automatically.
+## Deploying
 
-## Notes
+Pushes to `main` auto-deploy on Vercel, with `ANTHROPIC_API_KEY` set as an
+environment variable there.
 
-- The chatbot uses `claude-sonnet-5`. Chat calls cost a small amount per
-  message via the Anthropic API — fine at low traffic, but keep an eye on
-  usage if the site gets a lot of visitors.
-- To add a project, add an entry to `src/content/projects.ts` — no other
-  code changes needed; the grid, detail page, and chatbot all pick it up
-  automatically.
+---
+
+Open to software engineering roles, front-end through full-stack.
