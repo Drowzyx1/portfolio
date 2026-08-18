@@ -65,7 +65,7 @@ export const projects: Project[] = [
     role: "Designer & Developer",
     links: {
       demo: "",
-      repo: "",
+      repo: "https://github.com/Drowzyx1/portfolio",
     },
     highlights: [
       "Built an AI guide chatbot with tool-calling access to navigate_to_project, letting it route visitors to project pages directly instead of just describing them.",
