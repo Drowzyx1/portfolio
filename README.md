@@ -1,36 +1,59 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Portfolio
 
-## Getting Started
+Personal portfolio built with Next.js + TypeScript + Tailwind, with an AI
+guide chatbot (Claude API) layered on top of normal manual navigation.
 
-First, run the development server:
+## Structure
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+- `src/content/profile.ts` — your bio, skills, and work experience. **Edit this first.**
+- `src/content/projects.ts` — your projects. **Edit this too.** Same data
+  powers the `/projects` pages and the chatbot's knowledge.
+- `src/app/` — pages: home, `/projects`, `/projects/[slug]`, `/about`.
+- `src/app/api/chat/route.ts` — server-side API route that calls the Claude
+  API. Your API key never reaches the browser.
+- `src/lib/chatContext.ts` — builds the chatbot's system prompt from the
+  content files above.
+- `src/components/chat/ChatWidget.tsx` — the floating chat UI. The bot can
+  call a `navigate_to_project` tool, which the widget uses to route the
+  visitor to the right project page.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+The chatbot is additive — every page also works with it closed, via the
+normal nav bar.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Getting started
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+1. Fill in `src/content/profile.ts` and `src/content/projects.ts` with your
+   real information.
+2. Copy the env example and add your key:
 
-## Learn More
+   ```bash
+   cp .env.local.example .env.local
+   ```
 
-To learn more about Next.js, take a look at the following resources:
+   Get an API key from [console.anthropic.com](https://console.anthropic.com/settings/keys),
+   and paste it into `.env.local` as `ANTHROPIC_API_KEY`.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+3. Run the dev server:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+   ```bash
+   npm run dev
+   ```
 
-## Deploy on Vercel
+   Open [http://localhost:3000](http://localhost:3000).
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Deploying to Vercel
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+1. Push this repo to GitHub.
+2. Import it at [vercel.com/new](https://vercel.com/new).
+3. In the Vercel project's Environment Variables settings, add
+   `ANTHROPIC_API_KEY` with your key. It's never committed to git.
+4. Deploy. Every push to `main` will redeploy automatically.
+
+## Notes
+
+- The chatbot uses `claude-sonnet-5`. Chat calls cost a small amount per
+  message via the Anthropic API — fine at low traffic, but keep an eye on
+  usage if the site gets a lot of visitors.
+- To add a project, add an entry to `src/content/projects.ts` — no other
+  code changes needed; the grid, detail page, and chatbot all pick it up
+  automatically.
