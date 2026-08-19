@@ -63,6 +63,34 @@ export const profile = {
   skills: skillGroups.flatMap((g) => g.items),
 };
 
+export type WorkTrait = {
+  title: string;
+  description: string;
+};
+
+export const howIWork: WorkTrait[] = [
+  {
+    title: "Leadership & ownership",
+    description:
+      "Designed the store's first formal process for running tournaments at GEEK'D from scratch, and independently owned the Learn the Markets site for a full year post-launch — requirements, design, deployment, and maintenance, solo.",
+  },
+  {
+    title: "Cross-functional collaboration",
+    description:
+      "Worked inside a ~25-person cross-functional team (Design, Product, QA) at Spot Pet Insurance, and a 4-person student team building LOOK UP App under a tight capstone timeline.",
+  },
+  {
+    title: "Staying effective under pressure",
+    description:
+      "Caught and stopped an active scam attempt against Spot Pet Insurance by integrating fraud detection tooling, and ran live events at GEEK'D where staffing and logistics problems had to get solved in real time, not on a schedule.",
+  },
+  {
+    title: "Communication across teams and cultures",
+    description:
+      "Bilingual (English/Spanish), with experience working in multicultural, remote teams — translating technical work for non-technical stakeholders and clients.",
+  },
+];
+
 export type Experience = {
   role: string;
   company: string;

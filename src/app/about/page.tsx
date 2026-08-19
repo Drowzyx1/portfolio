@@ -1,4 +1,4 @@
-import { profile, skillGroups, experience } from "@/content/profile";
+import { profile, skillGroups, howIWork, experience } from "@/content/profile";
 
 export default function AboutPage() {
   return (
@@ -18,8 +18,28 @@ export default function AboutPage() {
         )}
       </div>
 
-      {profile.education && (
+      {howIWork.length > 0 && (
         <div className="animate-fade-in-up mt-8 opacity-0" style={{ animationDelay: "80ms" }}>
+          <h2 className="text-sm font-medium uppercase tracking-wide text-zinc-500">
+            How I Work
+          </h2>
+          <div className="mt-3 space-y-4">
+            {howIWork.map((trait) => (
+              <div key={trait.title}>
+                <h3 className="font-medium text-zinc-950 dark:text-zinc-50">
+                  {trait.title}
+                </h3>
+                <p className="mt-1 text-sm text-zinc-700 dark:text-zinc-300">
+                  {trait.description}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {profile.education && (
+        <div className="animate-fade-in-up mt-10 opacity-0" style={{ animationDelay: "160ms" }}>
           <h2 className="text-sm font-medium uppercase tracking-wide text-zinc-500">
             Education
           </h2>
@@ -38,7 +58,7 @@ export default function AboutPage() {
       )}
 
       {skillGroups.length > 0 && (
-        <div className="animate-fade-in-up mt-8 opacity-0" style={{ animationDelay: "160ms" }}>
+        <div className="animate-fade-in-up mt-8 opacity-0" style={{ animationDelay: "240ms" }}>
           <h2 className="text-sm font-medium uppercase tracking-wide text-zinc-500">
             Skills
           </h2>
@@ -65,7 +85,7 @@ export default function AboutPage() {
       )}
 
       {experience.length > 0 && (
-        <div className="animate-fade-in-up mt-10 opacity-0" style={{ animationDelay: "240ms" }}>
+        <div className="animate-fade-in-up mt-10 opacity-0" style={{ animationDelay: "320ms" }}>
           <h2 className="text-sm font-medium uppercase tracking-wide text-zinc-500">
             Experience
           </h2>

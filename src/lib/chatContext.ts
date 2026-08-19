@@ -1,7 +1,11 @@
-import { profile, experience } from "@/content/profile";
+import { profile, howIWork, experience } from "@/content/profile";
 import { projects } from "@/content/projects";
 
 export function buildSystemPrompt(): string {
+  const howIWorkText = howIWork
+    .map((t) => `- ${t.title}: ${t.description}`)
+    .join("\n");
+
   const projectsText = projects
     .map((p) =>
       [
@@ -34,6 +38,9 @@ Work authorization: ${profile.workAuthorization || "(not listed)"}
 Availability: ${profile.availability || "(not listed)"}
 Currently: ${profile.jobSearchNote || "(not listed)"}
 Links: GitHub ${profile.links.github || "(none)"}, LinkedIn ${profile.links.linkedin || "(none)"}${profile.links.resume ? `, Resume ${profile.links.resume}` : ""}
+
+HOW HE WORKS
+${howIWorkText || "(not listed)"}
 
 EXPERIENCE
 ${experienceText || "(none listed yet)"}
