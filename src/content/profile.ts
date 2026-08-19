@@ -46,7 +46,7 @@ export const profile = {
   links: {
     github: "https://github.com/Drowzyx1",
     linkedin: "https://www.linkedin.com/in/carlosemartinez1/",
-    resume: "", // link to a hosted PDF of your resume, if you want one
+    resume: "/resume.pdf",
   },
   education: {
     degree: "Bachelor of Science in Computer Science",
@@ -60,6 +60,7 @@ export const profile = {
     "Available immediately, pending two weeks' notice to his current employer.",
   jobSearchNote:
     "Actively looking for software engineering opportunities to start his career — open to front-end, back-end, full-stack, mobile, or other software development roles, not limited to web development.",
+  openToWorkLabel: "Open to software engineering roles",
   skills: skillGroups.flatMap((g) => g.items),
 };
 

@@ -35,6 +35,15 @@ export function HeroChat() {
           started ? "mb-6" : "mb-8"
         } ${mounted ? "translate-y-0 opacity-100" : "translate-y-4 opacity-0"}`}
       >
+        {profile.openToWorkLabel && (
+          <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-medium text-emerald-700 dark:border-emerald-900 dark:bg-emerald-950/40 dark:text-emerald-400">
+            <span className="relative flex h-2 w-2">
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
+              <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
+            </span>
+            {profile.openToWorkLabel}
+          </div>
+        )}
         <h1
           className={`font-semibold tracking-tight text-zinc-950 transition-all duration-500 dark:text-zinc-50 ${
             started ? "text-2xl" : "text-4xl sm:text-5xl"
