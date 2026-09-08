@@ -55,6 +55,27 @@ export const projects: Project[] = [
     featured: true,
   },
   {
+    slug: "tournament-tracker",
+    title: "Tournament Tracker",
+    tagline:
+      "Full-stack expense/earnings tracker for card game trips and tournaments, with its own multi-user auth and database.",
+    description:
+      "A full-stack web app for tracking expenses and earnings across card game trips and tournaments — grew out of running events at GEEK'D and wanting something better than a spreadsheet. Started as a single-file HTML prototype and rebuilt into a real multi-user app: each person signs up with their own email/password account and only ever sees their own trips, enforced at the API layer with a normalized schema (User → Trip → Transaction) so no one can see or edit someone else's data.",
+    tech: ["Next.js", "TypeScript", "PostgreSQL", "Prisma", "NextAuth.js"],
+    role: "Solo Developer",
+    links: {
+      demo: "https://tournament-tracker-rho.vercel.app/",
+      repo: "https://github.com/Drowzyx1/tournament-tracker",
+    },
+    highlights: [
+      "Built a full-stack expense/earnings tracker with Next.js, PostgreSQL, and Prisma ORM, including a normalized multi-user schema (User → Trip → Transaction).",
+      "Implemented password-based authentication with NextAuth.js and bcrypt-hashed credentials, scoping every API route to the signed-in user so one person can never see or edit another's data.",
+      "Debugged and fixed a production-only redirect loop caused by a cookie/secure-flag mismatch between local and Vercel environments.",
+      "Deployed on Vercel with a hosted Neon Postgres database, and made the UI responsive across mobile viewports.",
+    ],
+    featured: true,
+  },
+  {
     slug: "ai-guided-portfolio",
     title: "AI-Guided Portfolio",
     tagline:
