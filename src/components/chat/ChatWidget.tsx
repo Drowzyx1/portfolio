@@ -22,15 +22,15 @@ export function ChatWidget() {
   if (pathname === "/") return null;
 
   return (
-    <div className="fixed bottom-6 right-6 z-50">
+    <div className="fixed bottom-4 right-4 z-50 flex flex-col items-end sm:bottom-6 sm:right-6">
       {open && (
-        <div className="mb-3 flex h-[30rem] w-96 flex-col rounded-xl border border-zinc-200 bg-white shadow-xl dark:border-zinc-800 dark:bg-zinc-950">
+        <div className="mb-3 flex h-[min(30rem,calc(100dvh-8rem))] w-[calc(100vw-2rem)] max-w-96 flex-col rounded-xl border border-zinc-200 bg-white shadow-xl dark:border-zinc-800 dark:bg-zinc-950">
           <div className="flex items-center justify-between border-b border-zinc-200 px-4 py-3 dark:border-zinc-800">
             <span className="text-sm font-medium">Portfolio guide</span>
             <button
               onClick={() => setOpen(false)}
               aria-label="Close chat"
-              className="text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100"
+              className="-m-2 p-2 text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100"
             >
               ✕
             </button>
@@ -47,8 +47,8 @@ export function ChatWidget() {
             <input
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              placeholder={`Ask about ${profile.name}'s work…`}
-              className="w-full rounded-full border border-zinc-300 bg-transparent px-3 py-2 text-sm outline-none focus:border-zinc-500 dark:border-zinc-700"
+              placeholder={`Ask about ${profile.name.split(" ")[0]}'s work…`}
+              className="w-full min-w-0 rounded-full border border-zinc-300 bg-transparent px-3 py-2 text-base outline-none focus:border-zinc-500 sm:text-sm dark:border-zinc-700"
               disabled={loading}
             />
             <button

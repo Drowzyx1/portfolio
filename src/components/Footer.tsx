@@ -2,7 +2,7 @@ import { profile } from "@/content/profile";
 
 export function Footer() {
   return (
-    <footer className="border-t border-zinc-200 py-6 text-center text-sm text-zinc-500 dark:border-zinc-800 dark:text-zinc-500">
+    <footer className="border-t border-zinc-200 pb-24 pt-6 text-center sm:pb-6 text-sm text-zinc-500 dark:border-zinc-800 dark:text-zinc-500">
       <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1">
         {profile.email && (
           <a href={`mailto:${profile.email}`} className="hover:underline">

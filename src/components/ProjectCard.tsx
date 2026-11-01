@@ -21,7 +21,27 @@ export function ProjectCard({
       <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">
         {project.tagline}
       </p>
-      <div className="mt-3 flex flex-wrap gap-2">
+      {project.showcases && project.showcases.length > 0 && (
+        <ul
+          aria-label="What this project shows"
+          className="mt-3 flex flex-wrap gap-1.5"
+        >
+          {project.showcases.map((s) => (
+            <li
+              key={s}
+              className="inline-flex items-center gap-1 rounded-full border border-indigo-200 bg-indigo-50 px-2 py-0.5 text-xs font-medium text-indigo-700 dark:border-indigo-900 dark:bg-indigo-950/40 dark:text-indigo-300"
+            >
+              <span aria-hidden className="text-[0.6rem] leading-none">
+                ✦
+              </span>
+              {s}
+            </li>
+          ))}
+        </ul>
+      )}
+      <div
+        className={`flex flex-wrap gap-2 ${project.showcases?.length ? "mt-2" : "mt-3"}`}
+      >
         {project.tech.map((t) => (
           <span
             key={t}
