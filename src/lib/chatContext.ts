@@ -14,6 +14,7 @@ export function buildSystemPrompt(): string {
         `  tagline: ${p.tagline}`,
         `  description: ${p.description}`,
         `  tech: ${p.tech.join(", ")}`,
+        `  experience areas: ${p.categories.join(", ")}`,
         `  role: ${p.role}`,
         `  highlights: ${p.highlights.join("; ")}`,
       ].join("\n")

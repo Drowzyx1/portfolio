@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { notFound } from "next/navigation";
 import { getProjectBySlug, projects } from "@/content/projects";
 
@@ -86,6 +87,54 @@ export default async function ProjectPage({
           </a>
         )}
       </div>
+
+      {project.images && project.images.length > 0 && (
+        <div
+          className="animate-fade-in-up mt-12 opacity-0"
+          style={{ animationDelay: "320ms" }}
+        >
+          <h2 className="text-sm font-medium uppercase tracking-wide text-zinc-500">
+            Screenshots
+          </h2>
+          <div className="mt-4 gap-4 sm:columns-2">
+            {project.images.map((img) => (
+              <figure
+                key={img.src}
+                className={`mb-4 break-inside-avoid ${
+                  img.wide
+                    ? "[column-span:all]"
+                    : img.height > img.width * 1.5
+                      ? "mx-auto w-3/5"
+                      : ""
+                }`}
+              >
+                <a
+                  href={img.src}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={`block rounded-lg border border-zinc-200 transition-colors hover:border-zinc-400 dark:border-zinc-800 dark:hover:border-zinc-600 ${
+                    img.wide ? "overflow-x-auto sm:overflow-hidden" : "overflow-hidden"
+                  }`}
+                >
+                  <Image
+                    src={img.src}
+                    alt={img.alt}
+                    width={img.width}
+                    height={img.height}
+                    sizes={img.wide ? "720px" : "(min-width: 768px) 360px, 100vw"}
+                    className={`h-auto w-full ${img.wide ? "min-w-[640px] sm:min-w-0" : ""}`}
+                  />
+                </a>
+                {img.caption && (
+                  <figcaption className="mt-2 text-xs text-zinc-500">
+                    {img.caption}
+                  </figcaption>
+                )}
+              </figure>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

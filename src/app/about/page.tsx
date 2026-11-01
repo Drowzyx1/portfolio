@@ -92,11 +92,11 @@ export default function AboutPage() {
           <div className="mt-4 space-y-6">
             {experience.map((job, i) => (
               <div key={i}>
-                <div className="flex items-baseline justify-between">
+                <div className="flex flex-col gap-0.5 sm:flex-row sm:items-baseline sm:justify-between sm:gap-4">
                   <h3 className="font-medium text-zinc-950 dark:text-zinc-50">
                     {job.role} · {job.company}
                   </h3>
-                  <span className="text-sm text-zinc-500">
+                  <span className="text-sm text-zinc-500 sm:shrink-0">
                     {job.start === job.end ? job.start : `${job.start} – ${job.end}`}
                   </span>
                 </div>

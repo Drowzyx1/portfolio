@@ -62,7 +62,7 @@ export function HeroChat() {
       {started && (
         <div
           ref={scrollRef}
-          className="mb-4 max-h-[50vh] space-y-3 overflow-y-auto rounded-xl border border-zinc-200 bg-zinc-50/50 p-4 dark:border-zinc-800 dark:bg-zinc-950/50"
+          className="mb-4 max-h-[60dvh] space-y-3 overflow-y-auto rounded-xl border border-zinc-200 bg-zinc-50/50 p-3 sm:max-h-[50vh] sm:p-4 dark:border-zinc-800 dark:bg-zinc-950/50"
         >
           <ChatThread messages={messages} loading={loading} error={error} />
         </div>
@@ -80,8 +80,8 @@ export function HeroChat() {
         <input
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          placeholder={`Ask about ${profile.name}'s work…`}
-          className="w-full bg-transparent px-1 py-2 text-base outline-none"
+          placeholder={`Ask about ${profile.name.split(" ")[0]}'s work…`}
+          className="w-full min-w-0 bg-transparent px-1 py-2 text-base outline-none"
           disabled={loading}
         />
         <button

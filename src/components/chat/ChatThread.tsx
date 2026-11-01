@@ -21,7 +21,7 @@ export function ChatThread({
         return (
           <div key={i} className={m.role === "user" ? "text-right" : "text-left"}>
             <span
-              className={`inline-block max-w-[85%] rounded-lg px-3 py-2 text-sm ${
+              className={`inline-block max-w-[94%] rounded-lg px-3 py-2 text-left text-sm sm:max-w-[85%] ${
                 m.role === "user"
                   ? "bg-zinc-950 text-white dark:bg-white dark:text-black"
                   : "bg-zinc-100 text-zinc-800 dark:bg-zinc-900 dark:text-zinc-200"
@@ -30,7 +30,7 @@ export function ChatThread({
               {m.content}
             </span>
             {project && (
-              <div className="mt-2 max-w-[85%]">
+              <div className="mt-2 max-w-[94%] sm:max-w-[85%]">
                 <ProjectCard project={project} />
               </div>
             )}

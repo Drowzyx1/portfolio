@@ -7,7 +7,7 @@ export function Header() {
     <header className="border-b border-zinc-200 dark:border-zinc-800">
       <div className="mx-auto flex max-w-3xl items-center justify-between px-6 py-4">
         <div className="flex items-center gap-3">
-          <Link href="/" className="font-semibold tracking-tight">
+          <Link href="/" className="whitespace-nowrap font-semibold tracking-tight">
             {profile.name}
           </Link>
           {profile.openToWorkLabel && (
@@ -20,8 +20,8 @@ export function Header() {
             </span>
           )}
         </div>
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-3 text-zinc-500 dark:text-zinc-400">
+        <div className="flex items-center gap-3 sm:gap-4">
+          <div className="hidden items-center gap-3 text-zinc-500 sm:flex dark:text-zinc-400">
             {profile.links.github && (
               <a
                 href={profile.links.github}
