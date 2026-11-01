@@ -189,7 +189,7 @@ export const projects: Project[] = [
     role: "Designer & Developer",
     links: {
       demo: "",
-      repo: "",
+      repo: "https://github.com/Drowzyx1/Ai-Video-Maker",
     },
     highlights: [
       "Built the full pipeline in about 2,400 lines of Python: script generation, voice synthesis, frame rendering, audio mixing, and video encoding.",
