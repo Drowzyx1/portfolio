@@ -53,8 +53,8 @@ export function HeroChat() {
         </h1>
         {!started && (
           <p className="mt-3 text-lg text-zinc-600 dark:text-zinc-400">
-            Ask me about his projects, or tell me what you&apos;re looking for
-            and I&apos;ll point you the right way.
+            Tell me about the role you&apos;re hiring for and I&apos;ll show you
+            where he fits, or ask about his projects.
           </p>
         )}
       </div>
