@@ -1,5 +1,5 @@
 import { ProjectCard } from "@/components/ProjectCard";
-import { getProjectBySlug } from "@/content/projects";
+import { getProjectBySlug, type Project } from "@/content/projects";
 import type { Message } from "./useGuideChat";
 
 export function ChatThread({
@@ -14,9 +14,9 @@ export function ChatThread({
   return (
     <>
       {messages.map((m, i) => {
-        const project = m.projectSlug
-          ? getProjectBySlug(m.projectSlug)
-          : undefined;
+        const recommended = (m.projectSlugs ?? [])
+          .map((slug) => getProjectBySlug(slug))
+          .filter((p): p is Project => !!p);
 
         return (
           <div key={i} className={m.role === "user" ? "text-right" : "text-left"}>
@@ -29,11 +29,11 @@ export function ChatThread({
             >
               {m.content}
             </span>
-            {project && (
-              <div className="mt-2 max-w-[94%] sm:max-w-[85%]">
-                <ProjectCard project={project} />
+            {recommended.map((project, idx) => (
+              <div key={project.slug} className="mt-2 max-w-[94%] sm:max-w-[85%]">
+                <ProjectCard project={project} delay={idx * 120} />
               </div>
-            )}
+            ))}
           </div>
         );
       })}

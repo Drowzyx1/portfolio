@@ -33,21 +33,21 @@ export async function POST(req: NextRequest) {
 
   const response = await anthropic.messages.create({
     model: "claude-sonnet-5",
-    max_tokens: 500,
+    max_tokens: 800,
     system: buildSystemPrompt(),
     messages: trimmed,
     tools: [
       {
         name: "navigate_to_project",
         description:
-          "Send the visitor to a specific project's detail page on the portfolio site.",
+          "Show the visitor a clickable preview card for a project underneath your reply. Call it once per project you recommend (at most three, most relevant first). It does not navigate anywhere.",
         input_schema: {
           type: "object",
           properties: {
             slug: {
               type: "string",
               enum: projects.map((p) => p.slug),
-              description: "The slug of the project to navigate to.",
+              description: "The slug of the project to show a card for.",
             },
           },
           required: ["slug"],
@@ -57,16 +57,18 @@ export async function POST(req: NextRequest) {
   });
 
   let text = "";
-  let navigateTo: string | null = null;
+  const recommended: string[] = [];
 
   for (const block of response.content) {
     if (block.type === "text") {
       text += block.text;
     } else if (block.type === "tool_use" && block.name === "navigate_to_project") {
       const input = block.input as { slug?: string };
-      if (input.slug) navigateTo = input.slug;
+      if (input.slug && !recommended.includes(input.slug)) {
+        recommended.push(input.slug);
+      }
     }
   }
 
-  return NextResponse.json({ text, navigateTo });
+  return NextResponse.json({ text, projects: recommended.slice(0, 3) });
 }

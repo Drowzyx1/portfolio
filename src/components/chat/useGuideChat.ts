@@ -6,12 +6,12 @@ import { profile } from "@/content/profile";
 export type Message = {
   role: "user" | "assistant";
   content: string;
-  projectSlug?: string;
+  projectSlugs?: string[];
 };
 
 const GREETING: Message = {
   role: "assistant",
-  content: `Hi! I'm here to guide you through ${profile.name}'s work — ask me about his projects or experience and I'll point you to the right place.`,
+  content: `Hi! I'm here to guide you through ${profile.name}'s work. Tell me about the role you're hiring for and I'll show you where he fits, or ask about any of his projects and experience.`,
 };
 
 export function useGuideChat() {
@@ -48,7 +48,10 @@ export function useGuideChat() {
         {
           role: "assistant",
           content: data.text || "...",
-          projectSlug: data.navigateTo || undefined,
+          projectSlugs:
+            Array.isArray(data.projects) && data.projects.length
+              ? data.projects
+              : undefined,
         },
       ]);
     } catch {
