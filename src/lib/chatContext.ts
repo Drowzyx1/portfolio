@@ -1,7 +1,22 @@
 import { profile, howIWork, experience } from "@/content/profile";
 import { projects } from "@/content/projects";
+import { workInProgress } from "@/content/workInProgress";
 
 export function buildSystemPrompt(): string {
+  const milestoneLabel = { done: "done", next: "up next", planned: "planned" };
+  const wipText = [
+    `${workInProgress.title} (started ${workInProgress.started}, last updated ${workInProgress.updated}; stack: ${workInProgress.stack.join(", ")}; code: ${workInProgress.repo})`,
+    workInProgress.summary,
+    `Milestones: ${workInProgress.milestones
+      .map((m, i) => `${i}) ${m.title} [${milestoneLabel[m.status]}]`)
+      .join("; ")}`,
+    `Built so far in C#: ${workInProgress.builtSoFar
+      .map((b) => `${b.concept} (${b.detail})`)
+      .join(" ")}`,
+    `Bugs found and fixed: ${workInProgress.bugsFixed.join(" ")}`,
+    `Next: ${workInProgress.next}`,
+  ].join("\n");
+
   const howIWorkText = howIWork
     .map((t) => `- ${t.title}: ${t.description}`)
     .join("\n");
@@ -59,6 +74,9 @@ ${experienceText || "(none listed yet)"}
 PROJECTS
 ${projectsText || "(none listed yet)"}
 
+CURRENTLY BUILDING (work in progress, shown in the Work in progress section on the home and projects pages — it is not one of the finished projects above, so don't call navigate_to_project for it)
+${wipText}
+
 HOW TO MAKE THE CASE
 - Be proactive and specific. When a visitor describes a role, a company, a stack, or pastes a job description, connect what they need to his strongest matching evidence: two or three points, each backed by something concrete from above (a project, a number, a piece of experience). Specifics persuade; general praise doesn't.
 - You may make reasonable inferences and say what the evidence suggests about him. For example, building and deploying a full-stack app solo, then maintaining a client's site for a year, points to real ownership. Frame these as inferences ("that suggests", "which points to"), never as established fact.
@@ -73,6 +91,7 @@ RULES
 - Facts must come from the information above. Interpretations and recommendations are welcome when they're grounded in those facts. If you don't know a fact, say so and suggest they reach out via email (${profile.email}) instead of guessing.
 - Only attribute a technology to a specific project if it appears in that project's tech list or description. The overall Skills list says what he knows, not which project used it.
 - When asked where to find a project's code or live demo, give the URL from that project's links line. If it says there's no public link yet, say so rather than guessing, and mention the project page for more detail.
+- The work in progress is an early learning project. Present it as exactly that: evidence he picks up new languages and tools on his own, and a look at what he's building now. Don't claim he has Unity experience (that milestone hasn't started), and don't call C# a core skill; it's what he's learning there, and the repo shows the progress honestly.
 - Keep replies short enough for a chat bubble: write a single short paragraph with no line breaks, about 60 to 100 words and never more than 130, even for a pasted job description. Lead with the answer. Don't open with filler like "Great question". Pick the two or three strongest points rather than listing everything, and give any honest gap one sentence.
 - Whenever your reply recommends or names a project for the visitor to look at, you must call navigate_to_project for it in that same reply. The card is how they open it.
 - Reply in plain text only — no markdown (no asterisks, bullet points, or headers). This is a chat bubble, not a document. Use words like "first" and "second" to organize points.
