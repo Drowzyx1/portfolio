@@ -1,5 +1,5 @@
 import { workInProgress as w, type MilestoneStatus } from "@/content/workInProgress";
-import { ConsolePlayback } from "./ConsolePlayback";
+import { SimulationTabs } from "./SimulationTabs";
 
 const statusStyle: Record<MilestoneStatus, { icon: string; label: string; cls: string }> = {
   done: {
@@ -112,12 +112,11 @@ export function WorkInProgress() {
           <p className="mb-2 text-xs font-medium uppercase tracking-wide text-zinc-500">
             The simulation so far
           </p>
-          <ConsolePlayback menu={w.menu} steps={w.transcript} />
-          <p className="mt-2 text-xs text-zinc-500">
-            Real output from the console model, replayed one command at a time.
-            Close the valve and both the pressure system and the logger react,
-            without the valve knowing about either.
-          </p>
+          <SimulationTabs
+            menu={w.menu}
+            steps={w.transcript}
+            recreation={w.recreation}
+          />
         </div>
 
         <div className="mt-5 space-y-2">
@@ -125,16 +124,27 @@ export function WorkInProgress() {
             <summary className="cursor-pointer text-sm font-medium text-zinc-800 dark:text-zinc-200">
               What&apos;s built so far
             </summary>
-            <ul className="mt-2 space-y-2 text-sm text-zinc-700 dark:text-zinc-300">
-              {w.builtSoFar.map((b) => (
-                <li key={b.concept}>
-                  <span className="font-medium text-zinc-950 dark:text-zinc-50">
-                    {b.concept}.
-                  </span>{" "}
-                  {b.detail}
-                </li>
-              ))}
-            </ul>
+            {([2, 1] as const).map((ms) => (
+              <div key={ms} className="mt-3 first:mt-2">
+                <p className="text-xs font-medium uppercase tracking-wide text-zinc-500">
+                  {ms === 2
+                    ? "Milestone 2 · Unity scene"
+                    : "Milestone 1 · C# console model"}
+                </p>
+                <ul className="mt-1.5 space-y-2 text-sm text-zinc-700 dark:text-zinc-300">
+                  {w.builtSoFar
+                    .filter((b) => b.milestone === ms)
+                    .map((b) => (
+                      <li key={b.concept}>
+                        <span className="font-medium text-zinc-950 dark:text-zinc-50">
+                          {b.concept}.
+                        </span>{" "}
+                        {b.detail}
+                      </li>
+                    ))}
+                </ul>
+              </div>
+            ))}
           </details>
           <details className="group rounded-md border border-zinc-200 px-3 py-2 dark:border-zinc-800">
             <summary className="cursor-pointer text-sm font-medium text-zinc-800 dark:text-zinc-200">
