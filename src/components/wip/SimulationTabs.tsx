@@ -3,7 +3,7 @@
 import { useRef, useState } from "react";
 import type { TranscriptStep, WorkInProgress } from "@/content/workInProgress";
 import { ConsolePlayback } from "./ConsolePlayback";
-import { ValveGaugeSim } from "./ValveGaugeSim";
+import { SceneRecreation } from "./SceneRecreation";
 
 type TabId = "unity" | "console";
 
@@ -74,14 +74,16 @@ export function SimulationTabs({
         hidden={active !== "unity"}
       >
         <div className="rounded-lg border border-zinc-800 bg-zinc-950 p-3 text-zinc-200">
-          <ValveGaugeSim {...recreation} />
+          <SceneRecreation {...recreation} />
         </div>
         <p className="mt-2 text-xs text-zinc-500">
-          A web recreation of the Milestone 2 Unity scene, built from the scene&apos;s
-          real logic and values (3,000 PSI max, 800 PSI per second, 270° gauge
-          sweep). Click the valve and watch the gauge bleed down. Note that
-          OnPressureChanged only fires while pressure is moving. The Unity scene
-          itself runs in the editor and isn&apos;t hosted here.
+          A web recreation of the Unity scene&apos;s valve, gauge, access panel, and
+          guided procedure, built from the scripts&apos; real logic and values (3,000
+          PSI max, 800 PSI per second, a panel that swings 100° at 180° per second).
+          Follow the checklist, or try the steps out of order. The checklist and
+          summary mirror ProcedureUI, and OnPressureChanged only fires while
+          pressure is moving. The Unity scene itself runs in the editor and
+          isn&apos;t hosted here.
         </p>
       </div>
 
