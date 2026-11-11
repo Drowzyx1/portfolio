@@ -1,4 +1,8 @@
-import { workInProgress as w, type MilestoneStatus } from "@/content/workInProgress";
+import {
+  workInProgress as w,
+  milestoneLabels,
+  type MilestoneStatus,
+} from "@/content/workInProgress";
 import { SimulationTabs } from "./SimulationTabs";
 
 const statusStyle: Record<MilestoneStatus, { icon: string; label: string; cls: string }> = {
@@ -7,9 +11,9 @@ const statusStyle: Record<MilestoneStatus, { icon: string; label: string; cls: s
     label: "Done",
     cls: "text-emerald-600 dark:text-emerald-400",
   },
-  next: {
+  active: {
     icon: "→",
-    label: "Up next",
+    label: "In progress",
     cls: "text-amber-600 dark:text-amber-400",
   },
   planned: {
@@ -21,6 +25,7 @@ const statusStyle: Record<MilestoneStatus, { icon: string; label: string; cls: s
 
 export function WorkInProgress() {
   const done = w.milestones.filter((m) => m.status === "done").length;
+  const active = w.milestones.filter((m) => m.status === "active").length;
   const total = w.milestones.length;
 
   return (
@@ -67,7 +72,8 @@ export function WorkInProgress() {
           <div className="flex items-baseline justify-between text-xs text-zinc-500">
             <span>Progress</span>
             <span>
-              {done} of {total} milestones
+              {done} of {total} milestones done
+              {active > 0 ? ` · ${active} in progress` : ""}
             </span>
           </div>
           <div
@@ -78,10 +84,16 @@ export function WorkInProgress() {
             aria-valuenow={done}
             className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-zinc-200 dark:bg-zinc-800"
           >
-            <div
-              className="h-full rounded-full bg-emerald-500 transition-all duration-700"
-              style={{ width: `${(done / total) * 100}%` }}
-            />
+            <div className="relative h-full">
+              <div
+                className="absolute inset-y-0 left-0 rounded-full bg-amber-400/50 transition-all duration-700"
+                style={{ width: `${((done + active) / total) * 100}%` }}
+              />
+              <div
+                className="absolute inset-y-0 left-0 rounded-full bg-emerald-500 transition-all duration-700"
+                style={{ width: `${(done / total) * 100}%` }}
+              />
+            </div>
           </div>
           <ol className="mt-3 space-y-1.5">
             {w.milestones.map((m, i) => {
@@ -101,6 +113,9 @@ export function WorkInProgress() {
                   >
                     <span className="text-zinc-400">{i} · </span>
                     {m.title}
+                    {m.note && (
+                      <span className="block text-xs text-zinc-500">{m.note}</span>
+                    )}
                   </span>
                 </li>
               );
@@ -124,12 +139,10 @@ export function WorkInProgress() {
             <summary className="cursor-pointer text-sm font-medium text-zinc-800 dark:text-zinc-200">
               What&apos;s built so far
             </summary>
-            {([2, 1] as const).map((ms) => (
+            {([4, 3, 2, 1] as const).map((ms) => (
               <div key={ms} className="mt-3 first:mt-2">
                 <p className="text-xs font-medium uppercase tracking-wide text-zinc-500">
-                  {ms === 2
-                    ? "Milestone 2 · Unity scene"
-                    : "Milestone 1 · C# console model"}
+                  {milestoneLabels[ms]}
                 </p>
                 <ul className="mt-1.5 space-y-2 text-sm text-zinc-700 dark:text-zinc-300">
                   {w.builtSoFar

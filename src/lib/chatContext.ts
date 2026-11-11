@@ -3,15 +3,18 @@ import { projects } from "@/content/projects";
 import { workInProgress } from "@/content/workInProgress";
 
 export function buildSystemPrompt(): string {
-  const milestoneLabel = { done: "done", next: "up next", planned: "planned" };
+  const milestoneLabel = { done: "done", active: "in progress", planned: "planned" };
   const wipText = [
     `${workInProgress.title} (started ${workInProgress.started}, last updated ${workInProgress.updated}; stack: ${workInProgress.stack.join(", ")}; code: ${workInProgress.repo})`,
     workInProgress.summary,
-    `Progress: ${workInProgress.milestones.filter((m) => m.status === "done").length} of ${workInProgress.milestones.length} milestones done (they're numbered 0 to ${workInProgress.milestones.length - 1}).`,
+    `Progress: ${workInProgress.milestones.filter((m) => m.status === "done").length} of ${workInProgress.milestones.length} milestones done and ${workInProgress.milestones.filter((m) => m.status === "active").length} in progress (they're numbered 0 to ${workInProgress.milestones.length - 1}).`,
     `Milestones: ${workInProgress.milestones
-      .map((m, i) => `${i}) ${m.title} [${milestoneLabel[m.status]}]`)
+      .map(
+        (m, i) =>
+          `${i}) ${m.title} [${milestoneLabel[m.status]}${m.note ? `: ${m.note}` : ""}]`,
+      )
       .join("; ")}`,
-    `Built so far (Milestone 1 is a C# console app, Milestone 2 is a Unity scene): ${workInProgress.builtSoFar
+    `Built so far (Milestone 1 is a C# console app; Milestones 2 to 4 are in a Unity scene): ${workInProgress.builtSoFar
       .map((b) => `[Milestone ${b.milestone}] ${b.concept}: ${b.detail}`)
       .join(" ")}`,
     `Bugs found and fixed: ${workInProgress.bugsFixed.join(" ")}`,
@@ -92,7 +95,7 @@ RULES
 - Facts must come from the information above. Interpretations and recommendations are welcome when they're grounded in those facts. If you don't know a fact, say so and suggest they reach out via email (${profile.email}) instead of guessing.
 - Only attribute a technology to a specific project if it appears in that project's tech list or description. The overall Skills list says what he knows, not which project used it.
 - When asked where to find a project's code or live demo, give the URL from that project's links line. If it says there's no public link yet, say so rather than guessing, and mention the project page for more detail.
-- The work in progress is an early learning project. Present it as exactly that: evidence he picks up new languages and tools on his own, and a look at what he's building now. He is early in Unity: he has finished one milestone there (a small gray-box scene with a clickable valve, a pressure system, and a gauge), but he has no shipped or production Unity work, so don't describe him as an experienced Unity or game developer. Don't call C# a core skill either; it's what he's learning, and the repo shows the progress honestly.
+- The work in progress is an early learning project. Present it as exactly that: evidence he picks up new languages and tools on his own, and a look at what he's building now. He is early in Unity: he has finished one milestone there and is partway through two more (a small gray-box scene with a clickable valve, a pressure system, a gauge, an access-panel door, and an on-screen guided procedure), but he has no shipped or production Unity work, so don't describe him as an experienced Unity or game developer. Don't call C# a core skill either; it's what he's learning, and the repo shows the progress honestly.
 - Keep replies short enough for a chat bubble: write a single short paragraph with no line breaks, about 60 to 100 words and never more than 130, even for a pasted job description. Lead with the answer. Don't open with filler like "Great question". Pick the two or three strongest points rather than listing everything, and give any honest gap one sentence.
 - Whenever your reply recommends or names a project for the visitor to look at, you must call navigate_to_project for it in that same reply. The card is how they open it.
 - Reply in plain text only — no markdown (no asterisks, bullet points, or headers). This is a chat bubble, not a document. Use words like "first" and "second" to organize points.

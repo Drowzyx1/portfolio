@@ -6,13 +6,28 @@
 //
 // `recreation` holds the values the in-browser Unity recreation uses. They're copied
 // from the Unity scripts and scene (PressureSystem.maxPsi / psiPerSecond, Gauge.sweepDegrees,
-// Valve.closedAngle), so update them if those change.
+// Valve.closedAngle, Door.openAngle / degreesPerSecond) and the procedure's step assets,
+// so update them if those change.
 
-export type MilestoneStatus = "done" | "next" | "planned";
+export type MilestoneStatus = "done" | "active" | "planned";
 
 export type Milestone = {
   title: string;
   status: MilestoneStatus;
+  note?: string;
+};
+
+// One step of the guided procedure, mirroring a TrainingStep asset in the Unity project.
+export type RecreatedStep =
+  | { kind: "door"; instruction: string; mustBeOpen: boolean }
+  | { kind: "valve"; instruction: string; mustBeOpen: boolean }
+  | { kind: "pressureBelow"; instruction: string; maxPsi: number };
+
+export const milestoneLabels: Record<number, string> = {
+  4: "Milestone 4 · Physics (started)",
+  3: "Milestone 3 · Procedure system (nearly done)",
+  2: "Milestone 2 · Unity scene",
+  1: "Milestone 1 · C# console model",
 };
 
 export type TranscriptStep = {
@@ -29,7 +44,7 @@ export type WorkInProgress = {
   repo: string;
   stack: string[];
   milestones: Milestone[];
-  builtSoFar: { milestone: 1 | 2; concept: string; detail: string }[];
+  builtSoFar: { milestone: 1 | 2 | 3 | 4; concept: string; detail: string }[];
   bugsFixed: string[];
   next: string;
   recreation: {
@@ -37,6 +52,9 @@ export type WorkInProgress = {
     psiPerSecond: number;
     sweepDegrees: number;
     closedAngle: number;
+    doorOpenAngle: number;
+    doorDegreesPerSecond: number;
+    steps: RecreatedStep[];
   };
   menu: string;
   transcript: TranscriptStep[];
@@ -45,9 +63,9 @@ export type WorkInProgress = {
 export const workInProgress: WorkInProgress = {
   title: "Pump Station Maintenance Trainer",
   summary:
-    "A virtual maintenance trainer being built to learn C# and Unity. A trainee follows a guided procedure to replace a clogged hydraulic filter on a pump station: open the access panel, close the supply valve, wait for pressure to bleed off, swap the filter, then reopen the valve and confirm pressure is restored. The finished Unity version will warn about unsafe actions (like pulling the filter while the system is pressurized) and end with a summary of time taken and mistakes made. So far there's a console model of the logic and a walkable Unity scene where closing the supply valve bleeds the pressure gauge down to zero.",
+    "A virtual maintenance trainer being built to learn C# and Unity. A trainee follows a guided procedure to replace a clogged hydraulic filter on a pump station: open the access panel, close the supply valve, wait for pressure to bleed off, swap the filter, then reopen the valve and confirm pressure is restored. The finished Unity version will warn about unsafe actions (like pulling the filter while the system is pressurized) and end with a summary of time taken and mistakes made. So far there's a console model of the logic and a walkable Unity scene where an on-screen checklist guides the trainee through opening the access panel, closing the supply valve, waiting for the pressure to bleed off, and reopening the valve, then shows a summary of the run.",
   started: "November 2026",
-  updated: "Nov 9, 2026",
+  updated: "Nov 10, 2026",
   repo: "https://github.com/Drowzyx1/PumpStationTrainer",
   stack: ["C#", ".NET 9", "Unity 6.3 LTS"],
   milestones: [
@@ -59,15 +77,47 @@ export const workInProgress: WorkInProgress = {
     },
     {
       title: "Procedure system: steps as ScriptableObjects, UI, mistake detection",
-      status: "next",
+      status: "active",
+      note: "Step system, procedure manager, UI, and door step are done; mistake detection is next.",
     },
     {
       title: "Physics and polish: kinematic door, grabbable filters, socket, object pooling",
-      status: "planned",
+      status: "active",
+      note: "Started: the kinematic access-panel door is done.",
     },
     { title: "Profiling, debugging, and documentation", status: "planned" },
   ],
   builtSoFar: [
+    {
+      milestone: 4,
+      concept: "Kinematic door",
+      detail:
+        "The access panel is a kinematic Rigidbody that code moves instead of physics. Interact() only flips a target state; FixedUpdate() rotates toward it with MoveRotation and Quaternion.RotateTowards, so it swings smoothly and stays in sync with the physics system. The hinge is an empty parent at the panel's edge, so it pivots like a real door.",
+    },
+    {
+      milestone: 3,
+      concept: "Steps as data",
+      detail:
+        "TrainingStep is an abstract ScriptableObject with an instruction and an abstract IsComplete(ProcedureContext). DoorOpenStep, ValveStateStep, and PressureBelowStep each override it with their own rule, and each step is an asset made from the editor menu, so a new procedure needs no code.",
+    },
+    {
+      milestone: 3,
+      concept: "Assets vs scene data",
+      detail:
+        "Step assets live in the project, so they can't reference scene objects directly. A ProcedureContext in the scene gives them access: it builds a Dictionary of every valve keyed by its id with LINQ ToDictionary, and logs a clear error for an unknown id instead of failing later with a null reference.",
+    },
+    {
+      milestone: 3,
+      concept: "ProcedureManager",
+      detail:
+        "Runs the steps in order and calls IsComplete without knowing a step's concrete type (polymorphism). It times each step and raises OnStepStarted and OnProcedureComplete. Its state is exposed read-only, and the first event fires in Start(), after every listener has subscribed in OnEnable().",
+    },
+    {
+      milestone: 3,
+      concept: "Event-driven UI",
+      detail:
+        "ProcedureUI updates only on events, never per frame. It shows the current instruction, rebuilds the checklist with a StringBuilder, and computes the end summary (total time, slowest step) with LINQ Sum, Max, and IndexOf.",
+    },
     {
       milestone: 2,
       concept: "Interface + abstract MonoBehaviour",
@@ -143,12 +193,21 @@ export const workInProgress: WorkInProgress = {
     "Missing Input System package: scripts using UnityEngine.InputSystem wouldn't compile until the package was installed and the new input backend enabled.",
     "Gauge needle jumping on the first valve change: the gauge only updates when OnPressureChanged fires, which happens only on a change, so at startup it showed 0 PSI while the system sat at 3000. Added a one-time sync in Start(), which runs after every Awake().",
   ],
-  next: "Milestone 3, the procedure system: each training step becomes a ScriptableObject asset built on an abstract TrainingStep class, a ProcedureManager runs them in order, and an on-screen UI shows the current instruction and a checklist.",
+  next: "Milestone 4: grabbable filters (non-kinematic physics, kinematic while held), a filter socket using a trigger collider, the remove and install filter steps, and mistake detection, such as removing the filter while the system is pressurized.",
   recreation: {
     maxPsi: 3000,
     psiPerSecond: 800,
     sweepDegrees: 270,
     closedAngle: 90,
+    doorOpenAngle: 100,
+    doorDegreesPerSecond: 180,
+    steps: [
+      // The first step's asset has no instruction text yet; this wording comes from the README.
+      { kind: "door", instruction: "Open the access panel", mustBeOpen: true },
+      { kind: "valve", instruction: "Close the supply valve", mustBeOpen: false },
+      { kind: "pressureBelow", instruction: "Wait for Pressure to bleed off", maxPsi: 1 },
+      { kind: "valve", instruction: "Reopen the supply valve", mustBeOpen: true },
+    ],
   },
   menu: "Enter Option:\n1) Inspect All\n2) Toggle valve\n3) Report\n4) Debug Valve\n5) Repair Valve\n0) Exit",
   transcript: [
