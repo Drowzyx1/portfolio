@@ -6,8 +6,8 @@
 //
 // `recreation` holds the values the in-browser Unity recreation uses. They're copied
 // from the Unity scripts and scene (PressureSystem.maxPsi / psiPerSecond, Gauge.sweepDegrees,
-// Valve.closedAngle, Door.openAngle / degreesPerSecond) and the procedure's step assets,
-// so update them if those change.
+// Valve.closedAngle, Door.openAngle / degreesPerSecond, MistakeTracker.safePsi) and the
+// procedure's step assets, so update them if those change.
 
 export type MilestoneStatus = "done" | "active" | "planned";
 
@@ -21,11 +21,12 @@ export type Milestone = {
 export type RecreatedStep =
   | { kind: "door"; instruction: string; mustBeOpen: boolean }
   | { kind: "valve"; instruction: string; mustBeOpen: boolean }
-  | { kind: "pressureBelow"; instruction: string; maxPsi: number };
+  | { kind: "pressureBelow"; instruction: string; maxPsi: number }
+  | { kind: "partInSocket"; instruction: string; requiredPartId: string };
 
 export const milestoneLabels: Record<number, string> = {
-  4: "Milestone 4 · Physics (started)",
-  3: "Milestone 3 · Procedure system (nearly done)",
+  4: "Milestone 4 · Physics and polish",
+  3: "Milestone 3 · Procedure system",
   2: "Milestone 2 · Unity scene",
   1: "Milestone 1 · C# console model",
 };
@@ -54,6 +55,8 @@ export type WorkInProgress = {
     closedAngle: number;
     doorOpenAngle: number;
     doorDegreesPerSecond: number;
+    safePsi: number;
+    acceptsPartId: string;
     steps: RecreatedStep[];
   };
   menu: string;
@@ -63,9 +66,9 @@ export type WorkInProgress = {
 export const workInProgress: WorkInProgress = {
   title: "Pump Station Maintenance Trainer",
   summary:
-    "A virtual maintenance trainer being built to learn C# and Unity. A trainee follows a guided procedure to replace a clogged hydraulic filter on a pump station: open the access panel, close the supply valve, wait for pressure to bleed off, swap the filter, then reopen the valve and confirm pressure is restored. The finished Unity version will warn about unsafe actions (like pulling the filter while the system is pressurized) and end with a summary of time taken and mistakes made. So far there's a console model of the logic and a walkable Unity scene where an on-screen checklist guides the trainee through opening the access panel, closing the supply valve, waiting for the pressure to bleed off, and reopening the valve, then shows a summary of the run.",
+    "A virtual maintenance trainer being built to learn C# and Unity. A trainee follows a guided procedure to replace a clogged hydraulic filter on a pump station: open the access panel, close the supply valve, wait for pressure to bleed off, swap the filter, then reopen the valve and confirm pressure is restored. The Unity version now runs the whole six-step procedure end to end: an on-screen checklist guides the trainee, grabbable filters drop into a socket, pulling the old filter while the system is still pressurized triggers a warning and a burst of sparks, and the run ends with a summary of total time, mistakes, and the slowest step.",
   started: "November 2026",
-  updated: "Nov 10, 2026",
+  updated: "Nov 11, 2026",
   repo: "https://github.com/Drowzyx1/PumpStationTrainer",
   stack: ["C#", ".NET 9", "Unity 6.3 LTS"],
   milestones: [
@@ -77,17 +80,33 @@ export const workInProgress: WorkInProgress = {
     },
     {
       title: "Procedure system: steps as ScriptableObjects, UI, mistake detection",
-      status: "active",
-      note: "Step system, procedure manager, UI, and door step are done; mistake detection is next.",
+      status: "done",
     },
     {
       title: "Physics and polish: kinematic door, grabbable filters, socket, object pooling",
-      status: "active",
-      note: "Started: the kinematic access-panel door is done.",
+      status: "done",
     },
     { title: "Profiling, debugging, and documentation", status: "planned" },
   ],
   builtSoFar: [
+    {
+      milestone: 4,
+      concept: "Pooled spark effects",
+      detail:
+        "A burst of sparks plays at the socket on every mistake. Effects come from Unity's ObjectPool<T> instead of Instantiate and Destroy each time, which avoids garbage and GC spikes, and a coroutine returns each one to the pool when it finishes playing.",
+    },
+    {
+      milestone: 4,
+      concept: "Grabbable filters",
+      detail:
+        "Filters are non-kinematic while loose, so physics drops them, and kinematic while held (parented to a hold point on the camera) or installed. Each method sets the state it creates (PickUp, Drop, LockInto) with a shared Attach helper, and picking one up raises OnPickedUp.",
+    },
+    {
+      milestone: 4,
+      concept: "Filter socket",
+      detail:
+        "A trigger collider installs a dropped part through guard clauses: the socket is empty, the object is a Grabbable, it isn't held, and it's the right part id. The socket holds the part by reference (composition, not inheritance), subscribes to its OnPickedUp on insert and unsubscribes on removal, and exposes a computed CurrentPartId.",
+    },
     {
       milestone: 4,
       concept: "Kinematic door",
@@ -96,9 +115,15 @@ export const workInProgress: WorkInProgress = {
     },
     {
       milestone: 3,
+      concept: "Mistake detection",
+      detail:
+        "MistakeTracker is a second, independent listener on the old filter's OnPickedUp. If pressure is above a safe level it records the mistake and raises OnMistake, which the UI shows as a warning and the spark effect reacts to.",
+    },
+    {
+      milestone: 3,
       concept: "Steps as data",
       detail:
-        "TrainingStep is an abstract ScriptableObject with an instruction and an abstract IsComplete(ProcedureContext). DoorOpenStep, ValveStateStep, and PressureBelowStep each override it with their own rule, and each step is an asset made from the editor menu, so a new procedure needs no code.",
+        "TrainingStep is an abstract ScriptableObject with an instruction and an abstract IsComplete(ProcedureContext). DoorOpenStep, ValveStateStep, PressureBelowStep, and PartInSocketStep each override it with their own rule, and each step is an asset made from the editor menu, so a new procedure needs no code. One class can serve several steps with different data: PartInSocketStep with an empty id means \"socket must be empty\" (remove the filter), and with new-filter means \"new filter installed.\"",
     },
     {
       milestone: 3,
@@ -116,7 +141,7 @@ export const workInProgress: WorkInProgress = {
       milestone: 3,
       concept: "Event-driven UI",
       detail:
-        "ProcedureUI updates only on events, never per frame. It shows the current instruction, rebuilds the checklist with a StringBuilder, and computes the end summary (total time, slowest step) with LINQ Sum, Max, and IndexOf.",
+        "ProcedureUI updates only on events, never per frame. It shows the current instruction, rebuilds the checklist with a StringBuilder, shows mistake warnings, and computes the end summary (total time, mistakes, slowest step) with LINQ Sum, Max, and IndexOf.",
     },
     {
       milestone: 2,
@@ -191,9 +216,12 @@ export const workInProgress: WorkInProgress = {
     "Build output committed by accident: bin/ and obj/ in the console project were tracked because the ignore rules only covered the top level. Untracked them and added rules that match at any depth.",
     "A nested Git repository: Unity Hub created its own .git inside the Unity project, so the main repo would have stored only a pointer instead of the files. Removed the inner repo so everything lives in one place.",
     "Missing Input System package: scripts using UnityEngine.InputSystem wouldn't compile until the package was installed and the new input backend enabled.",
+    "Scene changes missing from the repo: the door and the first step worked locally but weren't in the pushed scene, because the scene and a step asset had unsaved changes. Now the scene and project are saved before every commit.",
+    "New filter vanishing when picked up: prefabs can't keep references to scene objects, so the filter prefab lost its hold-point reference and the copy attached to nothing. Set the reference on the scene instance instead.",
+    "Sparks never returning to the pool: the particle system was looping with continuous emission, so it never reported itself finished and the coroutine waited forever. Switched it to a single non-looping burst.",
     "Gauge needle jumping on the first valve change: the gauge only updates when OnPressureChanged fires, which happens only on a change, so at startup it showed 0 PSI while the system sat at 3000. Added a one-time sync in Start(), which runs after every Awake().",
   ],
-  next: "Milestone 4: grabbable filters (non-kinematic physics, kinematic while held), a filter socket using a trigger collider, the remove and install filter steps, and mistake detection, such as removing the filter while the system is pressurized.",
+  next: "Milestone 5: a Profiler pass with before and after screenshots, a deliberate memory-leak investigation with the Memory Profiler, and refactoring the procedure manager from polling every frame to reacting to events.",
   recreation: {
     maxPsi: 3000,
     psiPerSecond: 800,
@@ -201,11 +229,15 @@ export const workInProgress: WorkInProgress = {
     closedAngle: 90,
     doorOpenAngle: 100,
     doorDegreesPerSecond: 180,
+    safePsi: 1,
+    acceptsPartId: "new-filter",
     steps: [
-      // The first step's asset has no instruction text yet; this wording comes from the README.
       { kind: "door", instruction: "Open the access panel", mustBeOpen: true },
       { kind: "valve", instruction: "Close the supply valve", mustBeOpen: false },
       { kind: "pressureBelow", instruction: "Wait for Pressure to bleed off", maxPsi: 1 },
+      // An empty part id means "the socket must be empty".
+      { kind: "partInSocket", instruction: "Remove the clogged filter", requiredPartId: "" },
+      { kind: "partInSocket", instruction: "Install the new filter", requiredPartId: "new-filter" },
       { kind: "valve", instruction: "Reopen the supply valve", mustBeOpen: true },
     ],
   },

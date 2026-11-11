@@ -3,13 +3,26 @@
 import { useEffect, useRef, useState } from "react";
 import type { WorkInProgress } from "@/content/workInProgress";
 
-// A browser recreation of the Unity scene. It mirrors the logic of Valve.Interact,
-// Door.Interact and Door.FixedUpdate, PressureSystem.Update, Gauge.UpdateNeedle,
-// ProcedureManager.Update, and the checklist and summary text from ProcedureUI,
-// using the same constants and step rules. It is not a build of the Unity project.
+// A browser recreation of the Unity scene. It mirrors the logic of Valve.Interact, Door.Interact
+// and Door.FixedUpdate, PressureSystem.Update, Gauge.UpdateNeedle, Grabbable, FilterSocket,
+// MistakeTracker, SparkEffects (the object pool), ProcedureManager.Update, and the checklist,
+// warning, and summary text from ProcedureUI, using the same constants and step rules.
+// It is not a build of the Unity project.
 
 type Recreation = WorkInProgress["recreation"];
 type Step = Recreation["steps"][number];
+
+type FilterId = "old-filter" | "new-filter";
+type Place = "socket" | "floor" | "held";
+
+const FILTERS: { id: FilterId; label: string }[] = [
+  { id: "old-filter", label: "Old filter (clogged)" },
+  { id: "new-filter", label: "New filter" },
+];
+
+// How long a spark burst plays before the effect is returned to the pool. The real value is
+// the particle system's lifetime, which this recreation doesn't know, so it's an estimate.
+const SPARK_SECONDS = 1.2;
 
 type Sim = {
   valveOpen: boolean;
@@ -20,8 +33,14 @@ type Sim = {
   index: number; // ProcedureManager's current step
   stepStart: number;
   times: number[];
+  filters: Record<FilterId, Place>;
+  mistakes: string[];
+  poolCreated: number; // ObjectPool.CountAll
+  sparkRelease: number[]; // sim times when each playing effect goes back to the pool
+  burst: number; // bumps on each spark burst, to restart the animation
 };
 
+// FilterSocket.Start inserts the starting part, and the new filter sits loose.
 const freshSim = (maxPsi: number): Sim => ({
   valveOpen: true,
   psi: maxPsi,
@@ -31,7 +50,24 @@ const freshSim = (maxPsi: number): Sim => ({
   index: 0,
   stepStart: 0,
   times: [],
+  filters: { "old-filter": "socket", "new-filter": "floor" },
+  mistakes: [],
+  poolCreated: 0,
+  sparkRelease: [],
+  burst: 0,
 });
+
+const snapshot = (s: Sim): Sim => ({
+  ...s,
+  times: [...s.times],
+  filters: { ...s.filters },
+  mistakes: [...s.mistakes],
+  sparkRelease: [...s.sparkRelease],
+});
+
+// FilterSocket.CurrentPartId
+const socketPartId = (s: Sim): string =>
+  (Object.keys(s.filters) as FilterId[]).find((id) => s.filters[id] === "socket") ?? "";
 
 // Mathf.MoveTowards (also fine for one-axis Quaternion.RotateTowards)
 const moveTowards = (current: number, target: number, maxDelta: number) =>
@@ -46,7 +82,7 @@ const polar = (cx: number, cy: number, r: number, deg: number) => {
 };
 
 // TrainingStep.IsComplete
-function isComplete(step: Step, sim: Sim) {
+function isComplete(step: Step, sim: Sim): boolean {
   switch (step.kind) {
     case "door":
       return sim.doorOpen === step.mustBeOpen;
@@ -54,7 +90,38 @@ function isComplete(step: Step, sim: Sim) {
       return sim.valveOpen === step.mustBeOpen;
     case "pressureBelow":
       return sim.psi <= step.maxPsi;
+    case "partInSocket":
+      return socketPartId(sim) === step.requiredPartId;
   }
+}
+
+function FilterGlyph({ cx, cy, id }: { cx: number; cy: number; id: FilterId }) {
+  const clogged = id === "old-filter";
+  return (
+    <g>
+      <rect
+        x={cx - 17}
+        y={cy - 24}
+        width="34"
+        height="48"
+        rx="6"
+        fill={clogged ? "#78716c" : "#38bdf8"}
+        stroke={clogged ? "#44403c" : "#0ea5e9"}
+        strokeWidth="2"
+      />
+      {[-12, -2, 8].map((dy) => (
+        <line
+          key={dy}
+          x1={cx - 13}
+          x2={cx + 13}
+          y1={cy + dy}
+          y2={cy + dy}
+          stroke={clogged ? "#44403c" : "#bae6fd"}
+          strokeWidth="2"
+        />
+      ))}
+    </g>
+  );
 }
 
 export function SceneRecreation({
@@ -64,6 +131,8 @@ export function SceneRecreation({
   closedAngle,
   doorOpenAngle,
   doorDegreesPerSecond,
+  safePsi,
+  acceptsPartId,
   steps,
 }: Recreation) {
   const sim = useRef<Sim>(freshSim(maxPsi));
@@ -102,6 +171,12 @@ export function SceneRecreation({
         changed = true;
       }
 
+      // SparkEffects.ReleaseWhenDone: a finished effect goes back to the pool.
+      if (s.sparkRelease.some((r) => r <= s.t)) {
+        s.sparkRelease = s.sparkRelease.filter((r) => r > s.t);
+        changed = true;
+      }
+
       // ProcedureManager.Update: complete at most one step per frame, in order.
       const step = steps[s.index];
       if (step && isComplete(step, s)) {
@@ -112,7 +187,7 @@ export function SceneRecreation({
         changed = true;
       }
 
-      if (changed) setView({ ...s, times: [...s.times] });
+      if (changed) setView(snapshot(s));
       raf = requestAnimationFrame(tick);
     };
     raf = requestAnimationFrame(tick);
@@ -123,13 +198,42 @@ export function SceneRecreation({
   function toggleValve() {
     sim.current.valveOpen = !sim.current.valveOpen;
     setToggles((n) => n + 1);
-    setView({ ...sim.current, times: [...sim.current.times] });
+    setView(snapshot(sim.current));
   }
 
   // Door.Interact: only flips the target state; FixedUpdate does the swinging.
   function toggleDoor() {
     sim.current.doorOpen = !sim.current.doorOpen;
-    setView({ ...sim.current, times: [...sim.current.times] });
+    setView(snapshot(sim.current));
+  }
+
+  // Grabbable.PickUp, then everything subscribed to OnPickedUp reacts.
+  function pickUp(id: FilterId) {
+    const s = sim.current;
+    if (s.filters[id] === "held") return;
+    // FilterSocket.HandleRemoved needs no code here: the socket reads the part's place directly.
+    s.filters[id] = "held";
+
+    // MistakeTracker.CheckFilterRemoval listens to the OLD filter only.
+    if (id === "old-filter" && s.psi > safePsi) {
+      s.mistakes.push(`Removed ${id} while the system was at ${Math.round(s.psi)} PSI`);
+      // SparkEffects.PlaySparks: take an effect from the pool, creating one only if none is free.
+      if (s.sparkRelease.length >= s.poolCreated) s.poolCreated += 1;
+      s.sparkRelease.push(s.t + SPARK_SECONDS);
+      s.burst += 1;
+    }
+    setView(snapshot(s));
+  }
+
+  // Grabbable.Drop, and (if it lands in the trigger) FilterSocket.OnTriggerEnter's guard clauses.
+  function drop(id: FilterId, atSocket: boolean) {
+    const s = sim.current;
+    if (s.filters[id] !== "held") return;
+    s.filters[id] = "floor";
+    if (atSocket && socketPartId(s) === "" && id === acceptsPartId) {
+      s.filters[id] = "socket"; // Insert -> LockInto(slot)
+    }
+    setView(snapshot(s));
   }
 
   function restart() {
@@ -137,11 +241,12 @@ export function SceneRecreation({
     setToggles(0);
     setPressureEvents(0);
     setStepEvents(1);
-    setView({ ...sim.current });
+    setView(snapshot(sim.current));
   }
 
   const done = view.index >= steps.length;
   const current = steps[view.index];
+  const lastMistake = view.mistakes[view.mistakes.length - 1];
 
   // Gauge.UpdateNeedle: Clamp01 then Lerp across the sweep, starting at the lower left.
   const t = Math.min(Math.max(view.psi / maxPsi, 0), 1);
@@ -156,16 +261,21 @@ export function SceneRecreation({
   const slowest = view.times.length ? Math.max(...view.times) : 0;
   const slowestStep = steps[view.times.indexOf(slowest)];
 
+  const inSocket = socketPartId(view) as FilterId | "";
+  const onFloor = FILTERS.filter((f) => view.filters[f.id] === "floor");
+
   const tileCls =
     "flex flex-col items-center rounded-lg border border-zinc-800 bg-zinc-900/60 p-3";
   const pillCls =
     "mt-2 rounded-full bg-zinc-100 px-3 py-1 text-xs font-medium text-zinc-900 transition-colors group-hover:bg-white";
   const btnCls =
     "group flex flex-col items-center rounded-md px-2 py-1 outline-offset-4 focus-visible:outline focus-visible:outline-2 focus-visible:outline-amber-400";
+  const smallBtn =
+    "rounded-full bg-zinc-100 px-2.5 py-1 text-[11px] font-medium text-zinc-900 transition-colors hover:bg-white";
 
   return (
     <div>
-      {/* ProcedureUI: instruction and, when finished, the summary */}
+      {/* ProcedureUI: instruction, warning, and when finished the summary */}
       <div className="rounded-md border border-zinc-800 bg-zinc-900/60 px-3 py-2">
         <p className="text-[11px] uppercase tracking-wide text-zinc-500">
           {done ? "Finished" : `Step ${view.index + 1} of ${steps.length}`}
@@ -173,16 +283,23 @@ export function SceneRecreation({
         <p className="text-sm text-zinc-100" aria-live="polite">
           {done ? "Procedure complete!" : current.instruction}
         </p>
+        {lastMistake && (
+          <p className="mt-1 text-xs font-medium text-amber-400" role="status">
+            WARNING: {lastMistake}
+          </p>
+        )}
         {done && (
           <p className="mt-1 font-mono text-xs text-zinc-300">
             Total time: {total.toFixed(1)}s
+            <br />
+            Mistakes: {view.mistakes.length}
             <br />
             Slowest step: {slowestStep?.instruction} ({slowest.toFixed(1)}s)
           </p>
         )}
       </div>
 
-      <div className="mt-3 grid gap-3 sm:grid-cols-3">
+      <div className="mt-3 grid gap-3 sm:grid-cols-2">
         {/* Access panel (Door) */}
         <div className={tileCls}>
           <button type="button" onClick={toggleDoor} className={btnCls}>
@@ -284,6 +401,102 @@ export function SceneRecreation({
             {Math.round(view.psi).toLocaleString()} PSI
           </span>
         </div>
+
+        {/* Filter socket and the two grabbable filters */}
+        <div className={tileCls}>
+          <svg viewBox="0 0 200 150" className="h-32 w-full max-w-48" aria-hidden>
+            <text x="100" y="12" fontSize="8" fill="#71717a" textAnchor="middle">
+              filter socket
+            </text>
+            <rect
+              x="66"
+              y="18"
+              width="68"
+              height="68"
+              rx="8"
+              fill="#27272a"
+              stroke="#71717a"
+              strokeWidth="2"
+              strokeDasharray={inSocket ? undefined : "4 3"}
+            />
+            {inSocket && <FilterGlyph cx={100} cy={52} id={inSocket} />}
+            <line x1="10" y1="134" x2="190" y2="134" stroke="#52525b" strokeWidth="2" />
+            {onFloor.map((f, i) => (
+              <FilterGlyph
+                key={f.id}
+                cx={onFloor.length === 1 ? 100 : 60 + i * 80}
+                cy={108}
+                id={f.id}
+              />
+            ))}
+            {/* a burst of sparks at the socket; the key restarts it on every mistake */}
+            {view.burst > 0 && (
+              <g key={view.burst}>
+                {Array.from({ length: 8 }, (_, i) => {
+                  const a = (i / 8) * 2 * Math.PI;
+                  return (
+                    <line
+                      key={i}
+                      x1="100"
+                      y1="52"
+                      x2={100 + Math.cos(a) * 9}
+                      y2={52 + Math.sin(a) * 9}
+                      stroke="#fbbf24"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                    >
+                      <animateTransform
+                        attributeName="transform"
+                        type="translate"
+                        from="0 0"
+                        to={`${Math.cos(a) * 34} ${Math.sin(a) * 34}`}
+                        dur="0.9s"
+                        fill="freeze"
+                      />
+                      <animate attributeName="opacity" from="1" to="0" dur="0.9s" fill="freeze" />
+                    </line>
+                  );
+                })}
+              </g>
+            )}
+          </svg>
+
+          <ul className="mt-1 w-full space-y-1.5 text-xs">
+            {FILTERS.map((f) => {
+              const place = view.filters[f.id];
+              return (
+                <li key={f.id} className="flex items-center justify-between gap-2">
+                  <span className="min-w-0 text-zinc-300">
+                    {f.label}
+                    <span className="text-zinc-500">
+                      {" "}
+                      · {place === "socket" ? "in socket" : place === "held" ? "in hand" : "on floor"}
+                    </span>
+                  </span>
+                  <span className="flex shrink-0 gap-1">
+                    {place !== "held" ? (
+                      <button type="button" className={smallBtn} onClick={() => pickUp(f.id)}>
+                        Pick Up
+                      </button>
+                    ) : (
+                      <>
+                        <button type="button" className={smallBtn} onClick={() => drop(f.id, false)}>
+                          Drop
+                        </button>
+                        <button type="button" className={smallBtn} onClick={() => drop(f.id, true)}>
+                          Drop at socket
+                        </button>
+                      </>
+                    )}
+                  </span>
+                </li>
+              );
+            })}
+          </ul>
+          <p className="mt-2 w-full text-[11px] text-zinc-500">
+            The socket only accepts the {acceptsPartId}, and only when it&apos;s empty.
+          </p>
+        </div>
       </div>
 
       {/* ProcedureUI checklist */}
@@ -306,6 +519,16 @@ export function SceneRecreation({
           <div className="flex flex-wrap justify-between gap-x-4">
             <dt className="text-zinc-500">ProcedureManager.OnStepStarted</dt>
             <dd className="text-zinc-200">{stepEvents}× fired</dd>
+          </div>
+          <div className="flex flex-wrap justify-between gap-x-4">
+            <dt className="text-zinc-500">MistakeTracker.OnMistake</dt>
+            <dd className="text-zinc-200">{view.mistakes.length}× fired</dd>
+          </div>
+          <div className="flex flex-wrap justify-between gap-x-4">
+            <dt className="text-zinc-500">SparkEffects pool</dt>
+            <dd className="text-zinc-200">
+              {view.poolCreated} created · {view.sparkRelease.length} playing
+            </dd>
           </div>
         </dl>
         <button
