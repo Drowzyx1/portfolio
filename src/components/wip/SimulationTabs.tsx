@@ -77,13 +77,14 @@ export function SimulationTabs({
           <SceneRecreation {...recreation} />
         </div>
         <p className="mt-2 text-xs text-zinc-500">
-          A web recreation of the Unity scene&apos;s valve, gauge, access panel, and
-          guided procedure, built from the scripts&apos; real logic and values (3,000
-          PSI max, 800 PSI per second, a panel that swings 100° at 180° per second).
-          Follow the checklist, or try the steps out of order. The checklist and
-          summary mirror ProcedureUI, and OnPressureChanged only fires while
-          pressure is moving. The Unity scene itself runs in the editor and
-          isn&apos;t hosted here.
+          A web recreation of the Unity scene&apos;s valve, gauge, access panel, filter
+          socket, and guided procedure, built from the scripts&apos; real logic and values
+          (3,000 PSI max, 800 PSI per second, a panel that swings 100° at 180° per
+          second, a 1 PSI safe level). Follow the checklist, or try breaking it: pull
+          the old filter while the gauge is still high and the mistake tracker fires a
+          warning and a burst of sparks from a pool. The checklist and summary mirror
+          ProcedureUI. The Unity scene itself runs in the editor and isn&apos;t hosted
+          here.
         </p>
       </div>
 
