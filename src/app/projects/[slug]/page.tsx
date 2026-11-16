@@ -1,6 +1,7 @@
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import { getProjectBySlug, projects } from "@/content/projects";
+import { PumpTrainerDetails } from "@/components/pump/PumpTrainerDetails";
 
 export function generateStaticParams() {
   return projects.map((p) => ({ slug: p.slug }));
@@ -87,6 +88,8 @@ export default async function ProjectPage({
           </a>
         )}
       </div>
+
+      {project.slug === "pump-station-trainer" && <PumpTrainerDetails />}
 
       {project.images && project.images.length > 0 && (
         <div

@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
-import type { TranscriptStep, WorkInProgress } from "@/content/workInProgress";
+import type { PumpTrainer, TranscriptStep } from "@/content/pumpTrainer";
 import { ConsolePlayback } from "./ConsolePlayback";
 import { SceneRecreation } from "./SceneRecreation";
 
@@ -19,7 +19,7 @@ export function SimulationTabs({
 }: {
   menu: string;
   steps: TranscriptStep[];
-  recreation: WorkInProgress["recreation"];
+  recreation: PumpTrainer["recreation"];
 }) {
   const [active, setActive] = useState<TabId>("unity");
   const refs = useRef<Record<TabId, HTMLButtonElement | null>>({
@@ -82,9 +82,11 @@ export function SimulationTabs({
           (3,000 PSI max, 800 PSI per second, a panel that swings 100° at 180° per
           second, a 1 PSI safe level). Follow the checklist, or try breaking it: pull
           the old filter while the gauge is still high and the mistake tracker fires a
-          warning and a burst of sparks from a pool. The checklist and summary mirror
-          ProcedureUI. The Unity scene itself runs in the editor and isn&apos;t hosted
-          here.
+          warning and a burst of sparks from a pool. The procedure manager is
+          event-driven, as in the final code: its step-check counter only moves when a
+          valve, the pressure, the door, or the socket changes. The checklist and
+          summary mirror ProcedureUI. The Unity scene itself runs in the editor and
+          isn&apos;t hosted here.
         </p>
       </div>
 

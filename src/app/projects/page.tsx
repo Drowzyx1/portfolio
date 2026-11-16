@@ -1,6 +1,5 @@
 import { projects } from "@/content/projects";
 import { ProjectsExplorer } from "@/components/projects/ProjectsExplorer";
-import { WorkInProgress } from "@/components/wip/WorkInProgress";
 
 export default function ProjectsPage() {
   return (
@@ -9,9 +8,6 @@ export default function ProjectsPage() {
         Projects
       </h1>
       <ProjectsExplorer projects={projects} />
-      <div className="mt-14">
-        <WorkInProgress />
-      </div>
     </div>
   );
 }

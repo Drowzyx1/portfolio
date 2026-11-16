@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import type { TranscriptStep } from "@/content/workInProgress";
+import type { TranscriptStep } from "@/content/pumpTrainer";
 
 // Replays a recorded run of the console app, one command at a time. The output
 // is real (captured from the program), not a re-implementation of it.
