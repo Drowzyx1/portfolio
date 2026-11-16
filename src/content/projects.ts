@@ -15,6 +15,7 @@ export const projectCategories = [
   "Mobile",
   "AI & LLMs",
   "Data & APIs",
+  "Games & simulation",
   "Client & team work",
 ] as const;
 
@@ -217,6 +218,59 @@ export const projects: Project[] = [
         height: 960,
         caption:
           "More scene types: emoji badges, big text with highlighted words, and VS comparisons. Rendered by the app from a script, not edited by hand.",
+        wide: true,
+      },
+    ],
+    featured: false,
+  },
+  {
+    slug: "pump-station-trainer",
+    title: "Pump Station Maintenance Trainer",
+    tagline:
+      "A Unity training simulation: guide a trainee through replacing a clogged filter on a pump station, with a live checklist, mistake detection, and a run summary.",
+    description:
+      "A Unity virtual maintenance trainer built in November 2026 to learn C# and Unity. A trainee follows a guided, step-by-step procedure to replace a clogged hydraulic filter on a pump station, with mistake detection and an end-of-run summary: opening the access panel, closing the supply valve, waiting for the pressure to bleed off, swapping the filter, and reopening the valve. It was built in planned stages: a plain C# console model first, then the Unity scene milestone by milestone, finishing with a Profiler pass, a deliberate memory-leak investigation, and a refactor from per-frame polling to events. The interactive simulation on this page runs the same logic in the browser; the Unity project itself runs in the editor.",
+    tech: ["C#", "Unity 6.3 LTS", ".NET 9", "ScriptableObjects"],
+    categories: ["Games & simulation"],
+    showcases: ["Unity + C#", "Profiling & memory leaks", "Event-driven design"],
+    role: "Solo Developer",
+    links: {
+      demo: "",
+      repo: "https://github.com/Drowzyx1/PumpStationTrainer",
+    },
+    highlights: [
+      "Built a guided six-step training procedure in Unity and C# end to end: interaction, a pressure simulation, a live checklist, mistake detection with a spark effect, and an end-of-run summary with total time, mistakes, and the slowest step.",
+      "Modeled the logic first as a plain C# console app (abstract classes, interfaces, events, LINQ, reflection), then designed the Unity architecture around an IInteractable interface and procedure steps stored as ScriptableObject data, so a new procedure needs no code.",
+      "Mixed kinematic and non-kinematic physics: a code-driven kinematic access panel, and grabbable filters that fall when loose and turn kinematic when held or installed, with a trigger-collider socket that validates what it accepts.",
+      "Used the Unity Profiler to confirm zero per-frame allocations, then planted a 58 B-per-frame garbage allocation and traced it down the Hierarchy to a single method.",
+      "Reproduced and fixed a memory leak with Memory Profiler snapshots: a listener on a static event that never unsubscribed survived scene reloads and threw errors at destroyed objects.",
+      "Refactored the procedure manager from per-frame polling to event-driven checks with identical behavior, so it does no work while nothing changes.",
+      "Kept a bug log with the symptom, how each bug was found, its cause, the fix, and the lesson.",
+    ],
+    images: [
+      {
+        src: "/projects/pump-station-trainer/profiler-before.png",
+        alt: "Unity Profiler with the Hierarchy view showing 0 B of GC Alloc for every script",
+        width: 902,
+        height: 613,
+        caption: "Profiler pass, before: every script allocates 0 B per frame.",
+        wide: true,
+      },
+      {
+        src: "/projects/pump-station-trainer/profiler-garbage.png",
+        alt: "Unity Profiler showing PressureSystem.Update allocating 58 B every frame",
+        width: 1129,
+        height: 718,
+        caption:
+          "Garbage introduced on purpose: a string concatenation in PressureSystem.Update() shows up as 58 B every frame, traced down the Hierarchy to the method.",
+        wide: true,
+      },
+      {
+        src: "/projects/pump-station-trainer/profiler-after.png",
+        alt: "Unity Profiler after the fix, showing 0 B of GC Alloc again",
+        width: 1153,
+        height: 740,
+        caption: "After removing it: back to 0 B per frame, verified in the Profiler.",
         wide: true,
       },
     ],

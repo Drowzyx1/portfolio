@@ -1,21 +1,13 @@
-// Edit this file to update the Work in progress section. The home page, the
-// /projects page, and the chatbot all read from it.
+// Edit this file to update the Pump Station Maintenance Trainer project. The project page
+// (/projects/pump-station-trainer) and the chatbot both read from it.
 //
-// `transcript` is real output from running the console app (see the repo), with
-// the menu text trimmed after the first prompt. Re-capture it when the model changes.
+// `transcript` is real output from running the console app (see the repo), with the menu
+// text trimmed after the first prompt. Re-capture it if the console model changes.
 //
-// `recreation` holds the values the in-browser Unity recreation uses. They're copied
-// from the Unity scripts and scene (PressureSystem.maxPsi / psiPerSecond, Gauge.sweepDegrees,
+// `recreation` holds the values the in-browser Unity recreation uses. They're copied from the
+// Unity scripts and scene (PressureSystem.maxPsi / psiPerSecond, Gauge.sweepDegrees,
 // Valve.closedAngle, Door.openAngle / degreesPerSecond, MistakeTracker.safePsi) and the
 // procedure's step assets, so update them if those change.
-
-export type MilestoneStatus = "done" | "active" | "planned";
-
-export type Milestone = {
-  title: string;
-  status: MilestoneStatus;
-  note?: string;
-};
 
 // One step of the guided procedure, mirroring a TrainingStep asset in the Unity project.
 export type RecreatedStep =
@@ -25,6 +17,7 @@ export type RecreatedStep =
   | { kind: "partInSocket"; instruction: string; requiredPartId: string };
 
 export const milestoneLabels: Record<number, string> = {
+  5: "Milestone 5 · Profiling and refactoring",
   4: "Milestone 4 · Physics and polish",
   3: "Milestone 3 · Procedure system",
   2: "Milestone 2 · Unity scene",
@@ -37,17 +30,18 @@ export type TranscriptStep = {
   output: string;
 };
 
-export type WorkInProgress = {
+export type PumpTrainer = {
   title: string;
   summary: string;
   started: string;
-  updated: string;
+  completed: string;
   repo: string;
   stack: string[];
-  milestones: Milestone[];
-  builtSoFar: { milestone: 1 | 2 | 3 | 4; concept: string; detail: string }[];
-  bugsFixed: string[];
-  next: string;
+  process: { title: string; detail: string }[];
+  milestones: string[];
+  builtSoFar: { milestone: 1 | 2 | 3 | 4 | 5; concept: string; detail: string }[];
+  bugsFixed: { title: string; detail: string; lesson?: string }[];
+  nextIdeas: string[];
   recreation: {
     maxPsi: number;
     psiPerSecond: number;
@@ -63,32 +57,63 @@ export type WorkInProgress = {
   transcript: TranscriptStep[];
 };
 
-export const workInProgress: WorkInProgress = {
+export const pumpTrainer: PumpTrainer = {
   title: "Pump Station Maintenance Trainer",
   summary:
-    "A virtual maintenance trainer being built to learn C# and Unity. A trainee follows a guided procedure to replace a clogged hydraulic filter on a pump station: open the access panel, close the supply valve, wait for pressure to bleed off, swap the filter, then reopen the valve and confirm pressure is restored. The Unity version now runs the whole six-step procedure end to end: an on-screen checklist guides the trainee, grabbable filters drop into a socket, pulling the old filter while the system is still pressurized triggers a warning and a burst of sparks, and the run ends with a summary of total time, mistakes, and the slowest step.",
+    "A Unity virtual maintenance trainer built in November 2026 to learn C# and Unity. A trainee follows a guided, step-by-step procedure to replace a clogged hydraulic filter on a pump station: open the access panel, close the supply valve, wait for the pressure to bleed off, remove the clogged filter, install the new one, and reopen the valve. The current instruction and a live checklist are shown on screen, removing the filter while the system is still pressurized triggers a warning and a spark effect, and the run ends with a summary of total time, mistakes, and the slowest step.",
   started: "November 2026",
-  updated: "Nov 11, 2026",
+  completed: "Nov 14, 2026",
   repo: "https://github.com/Drowzyx1/PumpStationTrainer",
   stack: ["C#", ".NET 9", "Unity 6.3 LTS"],
+  process: [
+    {
+      title: "Requirements first",
+      detail:
+        "Broke the trainer into what it needed to do: interactable parts, a pressure simulation, an ordered procedure whose steps check the state of the world, mistake detection, and feedback for the trainee.",
+    },
+    {
+      title: "Model the logic in plain C#",
+      detail:
+        "A console app let the object model come together without the engine in the way: an abstract Component hierarchy, interfaces for capabilities, and events between systems.",
+    },
+    {
+      title: "Design the Unity architecture",
+      detail:
+        "Before writing scripts: an IInteractable interface so one click handler works on anything clickable, procedure steps as ScriptableObject data so a new procedure needs no code, and a ProcedureContext so those assets can reach scene objects.",
+    },
+    {
+      title: "Implement milestone by milestone",
+      detail:
+        "Interaction, then the procedure system, then physics and polish, then profiling and refactoring, committing working progress at each step.",
+    },
+  ],
   milestones: [
-    { title: "Setup (Unity 6.3 LTS, .NET, Git)", status: "done" },
-    { title: "Pure C# model (console app)", status: "done" },
-    {
-      title: "Unity interaction: clickable valve, event-driven gauge, prefabs",
-      status: "done",
-    },
-    {
-      title: "Procedure system: steps as ScriptableObjects, UI, mistake detection",
-      status: "done",
-    },
-    {
-      title: "Physics and polish: kinematic door, grabbable filters, socket, object pooling",
-      status: "done",
-    },
-    { title: "Profiling, debugging, and documentation", status: "planned" },
+    "Setup (Unity 6.3 LTS, .NET, Git)",
+    "Pure C# model (console app)",
+    "Unity interaction: clickable valve, event-driven gauge, prefabs",
+    "Procedure system: ScriptableObject steps, UI, mistake detection",
+    "Physics and polish: kinematic door, grabbable filters, socket, object pooling",
+    "Profiling, debugging, event-driven refactor",
   ],
   builtSoFar: [
+    {
+      milestone: 5,
+      concept: "Profiler pass",
+      detail:
+        "Every script allocates 0 B per frame (CPU module, Hierarchy view sorted by GC Alloc). To practice finding garbage, a string concatenation was added to PressureSystem.Update() on purpose: the Profiler showed 58 B every frame, which was traced down the Hierarchy to the method, removed, and verified.",
+    },
+    {
+      milestone: 5,
+      concept: "Memory-leak investigation",
+      detail:
+        "A listener was deliberately subscribed to a static event without unsubscribing, then the scene was reloaded repeatedly. Memory Profiler snapshots showed dead subscribers piling up that could never be freed, and the event kept firing at destroyed objects (MissingReferenceException). Fixed by unsubscribing in OnDisable().",
+    },
+    {
+      milestone: 5,
+      concept: "Polling to events",
+      detail:
+        "ProcedureManager originally checked the current step every frame in Update(), which was simple and got the procedure working first. Once everything worked, it was refactored to subscribe to the four state-change events instead, so it does no work while nothing changes and isn't tied to frame timing. Behavior stayed identical, and it disappears from the Profiler's per-frame list.",
+    },
     {
       milestone: 4,
       concept: "Pooled spark effects",
@@ -135,7 +160,7 @@ export const workInProgress: WorkInProgress = {
       milestone: 3,
       concept: "ProcedureManager",
       detail:
-        "Runs the steps in order and calls IsComplete without knowing a step's concrete type (polymorphism). It times each step and raises OnStepStarted and OnProcedureComplete. Its state is exposed read-only, and the first event fires in Start(), after every listener has subscribed in OnEnable().",
+        "Runs the steps in order and calls IsComplete without knowing a step's concrete type (polymorphism). It times each step and raises OnStepStarted and OnProcedureComplete. It's fully event-driven: it re-checks the current step only when a valve, the pressure, the door, or the socket changes, with no per-frame polling. Its state is exposed read-only.",
     },
     {
       milestone: 3,
@@ -211,17 +236,59 @@ export const workInProgress: WorkInProgress = {
     },
   ],
   bugsFixed: [
-    "Listeners subscribed more than once: each valve toggle printed one, then two, then three sets of reactions, because the subscription code sat inside a loop. Moved it outside so it runs once.",
-    "The console app's project file was missing from the repo: the Unity .gitignore template ignores every *.csproj. Added an exception for it.",
-    "Build output committed by accident: bin/ and obj/ in the console project were tracked because the ignore rules only covered the top level. Untracked them and added rules that match at any depth.",
-    "A nested Git repository: Unity Hub created its own .git inside the Unity project, so the main repo would have stored only a pointer instead of the files. Removed the inner repo so everything lives in one place.",
-    "Missing Input System package: scripts using UnityEngine.InputSystem wouldn't compile until the package was installed and the new input backend enabled.",
-    "Scene changes missing from the repo: the door and the first step worked locally but weren't in the pushed scene, because the scene and a step asset had unsaved changes. Now the scene and project are saved before every commit.",
-    "New filter vanishing when picked up: prefabs can't keep references to scene objects, so the filter prefab lost its hold-point reference and the copy attached to nothing. Set the reference on the scene instance instead.",
-    "Sparks never returning to the pool: the particle system was looping with continuous emission, so it never reported itself finished and the coroutine waited forever. Switched it to a single non-looping burst.",
-    "Gauge needle jumping on the first valve change: the gauge only updates when OnPressureChanged fires, which happens only on a change, so at startup it showed 0 PSI while the system sat at 3000. Added a one-time sync in Start(), which runs after every Awake().",
+    {
+      title: "Memory leak from a static event",
+      detail:
+        "After reloading the scene a few times, changing the pressure filled the Console with MissingReferenceException errors, and the count grew with every reload. Memory Profiler snapshots before and after 10 reloads showed leaked listener objects, each holding a 1 MB array, piling up. A listener had subscribed to a static event in OnEnable and never unsubscribed, so every reload added a subscriber while the destroyed ones stayed referenced. Fixed by unsubscribing in OnDisable().",
+      lesson:
+        "Every += needs a matching -=, especially for static events or any event source that outlives its listeners.",
+    },
+    {
+      title: "Listeners subscribing more than once",
+      detail:
+        "Each valve toggle printed one, then two, then three sets of reactions. The setup code that subscribes in constructors sat inside a foreach loop, so every pass added another pair of listeners. Moved it outside the loop so it runs once.",
+      lesson:
+        "Each subscription runs its handler once per event, so subscribing twice means reacting twice.",
+    },
+    {
+      title: "Gauge needle jumping on the first valve change",
+      detail:
+        "The needle snapped from 0 to near 3000 on the first change. Pressure starts at 3000 in Awake, but the gauge only updates on OnPressureChanged, which fires only on a change, so it showed its editor default until then. Added a one-time sync in Start(), which runs after every Awake().",
+      lesson: "Event-driven displays need an initial sync.",
+    },
+    {
+      title: "Scene changes missing from the repo",
+      detail:
+        "The door and the first step worked locally but weren't in the pushed scene, and a step asset's instruction was blank, because both had unsaved changes in the editor. Saved the scene and the project, checked git status, and recommitted.",
+      lesson: "Before every commit, save the scene and project, then check git status.",
+    },
+    {
+      title: "New filter vanishing when picked up",
+      detail:
+        "The old filter could be picked up, but the new one disappeared. Comparing the two filters' Inspector fields showed an empty Hold Point: prefabs can't keep references to scene objects, so picking it up attached it to the world origin. Set the reference on the scene instance.",
+      lesson:
+        "Scene-object references belong on scene instances, or should be found at runtime, not stored in prefabs.",
+    },
+    {
+      title: "Sparks never returning to the pool",
+      detail:
+        "Sparks kept spawning forever after a mistake. The particle system was looping with continuous emission, so it never reported itself finished and the coroutine waiting on it never completed. Switched it to a single non-looping burst.",
+      lesson:
+        "Pooling depends on knowing when an object is done; an effect that never ends never gets returned.",
+    },
+    {
+      title: "Repo setup",
+      detail:
+        "The Unity .gitignore template ignored the console project's .csproj, build output (bin/ and obj/) had been committed, and Unity Hub had created a nested Git repository. Fixed all three.",
+    },
   ],
-  next: "Milestone 5: a Profiler pass with before and after screenshots, a deliberate memory-leak investigation with the Memory Profiler, and refactoring the procedure manager from polling every frame to reacting to events.",
+  nextIdeas: [
+    "Load procedures from external data (such as JSON), so trainers can be authored without opening Unity",
+    "More mistake types (wrong order, wrong part) and per-step hints",
+    "Make the drain valve affect how fast pressure bleeds off",
+    "Save and replay a trainee's session for instructor review",
+    "Unit tests for step logic and the procedure manager",
+  ],
   recreation: {
     maxPsi: 3000,
     psiPerSecond: 800,

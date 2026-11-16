@@ -1,15 +1,15 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import type { WorkInProgress } from "@/content/workInProgress";
+import type { PumpTrainer } from "@/content/pumpTrainer";
 
 // A browser recreation of the Unity scene. It mirrors the logic of Valve.Interact, Door.Interact
 // and Door.FixedUpdate, PressureSystem.Update, Gauge.UpdateNeedle, Grabbable, FilterSocket,
-// MistakeTracker, SparkEffects (the object pool), ProcedureManager.Update, and the checklist,
+// MistakeTracker, SparkEffects (the object pool), the event-driven ProcedureManager, and the checklist,
 // warning, and summary text from ProcedureUI, using the same constants and step rules.
 // It is not a build of the Unity project.
 
-type Recreation = WorkInProgress["recreation"];
+type Recreation = PumpTrainer["recreation"];
 type Step = Recreation["steps"][number];
 
 type FilterId = "old-filter" | "new-filter";
@@ -38,6 +38,8 @@ type Sim = {
   poolCreated: number; // ObjectPool.CountAll
   sparkRelease: number[]; // sim times when each playing effect goes back to the pool
   burst: number; // bumps on each spark burst, to restart the animation
+  checks: number; // how many times ProcedureManager.CheckCurrentStep has run
+  stepsStarted: number; // OnStepStarted events fired
 };
 
 // FilterSocket.Start inserts the starting part, and the new filter sits loose.
@@ -55,6 +57,8 @@ const freshSim = (maxPsi: number): Sim => ({
   poolCreated: 0,
   sparkRelease: [],
   burst: 0,
+  checks: 0,
+  stepsStarted: 1, // Start() fires OnStepStarted for step 1
 });
 
 const snapshot = (s: Sim): Sim => ({
@@ -93,6 +97,25 @@ function isComplete(step: Step, sim: Sim): boolean {
     case "partInSocket":
       return socketPartId(sim) === step.requiredPartId;
   }
+}
+
+// ProcedureManager.CheckCurrentStep: the manager calls this only when a valve, the pressure, the
+// door, or the socket changes. It loops, so several steps can complete in one check.
+function checkCurrentStep(s: Sim, steps: Step[]) {
+  s.checks += 1;
+  while (s.index < steps.length && isComplete(steps[s.index], s)) {
+    s.times.push(s.t - s.stepStart);
+    s.stepStart = s.t;
+    s.index += 1;
+    if (s.index < steps.length) s.stepsStarted += 1; // otherwise OnProcedureComplete fires
+  }
+}
+
+// ProcedureManager.Start: fire OnStepStarted for step 1, then check once.
+function startSim(maxPsi: number, steps: Step[]): Sim {
+  const s = freshSim(maxPsi);
+  checkCurrentStep(s, steps);
+  return s;
 }
 
 function FilterGlyph({ cx, cy, id }: { cx: number; cy: number; id: FilterId }) {
@@ -135,11 +158,10 @@ export function SceneRecreation({
   acceptsPartId,
   steps,
 }: Recreation) {
-  const sim = useRef<Sim>(freshSim(maxPsi));
-  const [view, setView] = useState<Sim>(() => freshSim(maxPsi));
+  const sim = useRef<Sim>(startSim(maxPsi, steps));
+  const [view, setView] = useState<Sim>(() => startSim(maxPsi, steps));
   const [toggles, setToggles] = useState(0);
   const [pressureEvents, setPressureEvents] = useState(0);
-  const [stepEvents, setStepEvents] = useState(1); // Start() fires OnStepStarted for step 1
 
   useEffect(() => {
     let raf = 0;
@@ -157,6 +179,7 @@ export function SceneRecreation({
       if (Math.abs(nextPsi - s.psi) > 1e-6) {
         s.psi = nextPsi;
         setPressureEvents((n) => n + 1);
+        checkCurrentStep(s, steps); // ProcedureManager.HandlePressure
         changed = true;
       }
 
@@ -177,16 +200,6 @@ export function SceneRecreation({
         changed = true;
       }
 
-      // ProcedureManager.Update: complete at most one step per frame, in order.
-      const step = steps[s.index];
-      if (step && isComplete(step, s)) {
-        s.times.push(s.t - s.stepStart);
-        s.stepStart = s.t;
-        s.index += 1;
-        if (s.index < steps.length) setStepEvents((n) => n + 1);
-        changed = true;
-      }
-
       if (changed) setView(snapshot(s));
       raf = requestAnimationFrame(tick);
     };
@@ -198,12 +211,14 @@ export function SceneRecreation({
   function toggleValve() {
     sim.current.valveOpen = !sim.current.valveOpen;
     setToggles((n) => n + 1);
+    checkCurrentStep(sim.current, steps); // ProcedureManager.HandleValve
     setView(snapshot(sim.current));
   }
 
   // Door.Interact: only flips the target state; FixedUpdate does the swinging.
   function toggleDoor() {
     sim.current.doorOpen = !sim.current.doorOpen;
+    checkCurrentStep(sim.current, steps); // ProcedureManager.HandleDoor
     setView(snapshot(sim.current));
   }
 
@@ -212,6 +227,7 @@ export function SceneRecreation({
     const s = sim.current;
     if (s.filters[id] === "held") return;
     // FilterSocket.HandleRemoved needs no code here: the socket reads the part's place directly.
+    const wasInSocket = s.filters[id] === "socket";
     s.filters[id] = "held";
 
     // MistakeTracker.CheckFilterRemoval listens to the OLD filter only.
@@ -222,6 +238,7 @@ export function SceneRecreation({
       s.sparkRelease.push(s.t + SPARK_SECONDS);
       s.burst += 1;
     }
+    if (wasInSocket) checkCurrentStep(s, steps); // FilterSocket.OnContentsChanged -> HandleSocket
     setView(snapshot(s));
   }
 
@@ -232,15 +249,15 @@ export function SceneRecreation({
     s.filters[id] = "floor";
     if (atSocket && socketPartId(s) === "" && id === acceptsPartId) {
       s.filters[id] = "socket"; // Insert -> LockInto(slot)
+      checkCurrentStep(s, steps); // FilterSocket.OnContentsChanged -> HandleSocket
     }
     setView(snapshot(s));
   }
 
   function restart() {
-    sim.current = freshSim(maxPsi);
+    sim.current = startSim(maxPsi, steps);
     setToggles(0);
     setPressureEvents(0);
-    setStepEvents(1);
     setView(snapshot(sim.current));
   }
 
@@ -518,7 +535,11 @@ export function SceneRecreation({
           </div>
           <div className="flex flex-wrap justify-between gap-x-4">
             <dt className="text-zinc-500">ProcedureManager.OnStepStarted</dt>
-            <dd className="text-zinc-200">{stepEvents}× fired</dd>
+            <dd className="text-zinc-200">{view.stepsStarted}× fired</dd>
+          </div>
+          <div className="flex flex-wrap justify-between gap-x-4">
+            <dt className="text-zinc-500">ProcedureManager.CheckCurrentStep</dt>
+            <dd className="text-zinc-200">{view.checks}× run</dd>
           </div>
           <div className="flex flex-wrap justify-between gap-x-4">
             <dt className="text-zinc-500">MistakeTracker.OnMistake</dt>

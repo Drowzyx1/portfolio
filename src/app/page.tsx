@@ -1,7 +1,6 @@
 import { getFeaturedProjects } from "@/content/projects";
 import { ProjectCard } from "@/components/ProjectCard";
 import { HeroChat } from "@/components/home/HeroChat";
-import { WorkInProgress } from "@/components/wip/WorkInProgress";
 
 export default function Home() {
   const featured = getFeaturedProjects();
@@ -22,10 +21,6 @@ export default function Home() {
           </div>
         </section>
       )}
-
-      <div className="mx-auto max-w-3xl px-6 pb-16">
-        <WorkInProgress />
-      </div>
     </div>
   );
 }
