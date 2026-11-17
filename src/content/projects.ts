@@ -46,7 +46,7 @@ export const projects: Project[] = [
     title: "LOOK UP App",
     tagline: "Senior design capstone — a mobile app that scans nearby planes on a 2D map or in AR by pointing your phone at the sky.",
     description:
-      "A full-stack senior design capstone built with a 4-person student team over the fall 2024 semester. A React Native mobile app that detects planes near the user and offers two ways to explore: a 2D map view, or an AR mode where the camera scans the sky and overlays live flight data once it identifies a plane in frame. Owned the front end for the 2D map experience: designing the UI, building the search and filter system in TypeScript, and designing the plane information cards. One of the bigger challenges was flight data reliability — after testing several providers, the team landed on the Flightradar24 API, and getting the payload parsed and displayed correctly took real iteration.",
+      "A senior design capstone built with a 4-person student team over two semesters (fall 2024 – spring 2025) — a React Native mobile app that detects planes near the user and offers two ways to explore: a 2D map view, or an AR mode where the camera scans the sky and overlays live flight data once it identifies a plane in frame. Owned the front end for the 2D map experience: designing the UI, building the search and filter system in TypeScript, and designing the plane information cards. One of the bigger challenges was flight data reliability — after testing several providers, the team landed on the Flightradar24 API, and getting the payload parsed and displayed correctly took real iteration.",
     tech: ["TypeScript", "React Native", "Expo", "Flightradar24 API"],
     categories: ["Mobile", "Front-end", "Data & APIs", "Client & team work"],
     showcases: ["Mobile + AR", "Live API data", "4-person team"],
@@ -56,7 +56,7 @@ export const projects: Project[] = [
       repo: "https://github.com/c4den/LookUp",
     },
     highlights: [
-      "Designed and implemented the UI for the 2D map experience as part of a team, over a 3-month sprint.",
+      "Designed and implemented the UI for the 2D map experience as part of a team, over a two-semester senior design sequence.",
       "Built and iterated on the search and filter system in TypeScript through ~4 rounds of optimization.",
       "Designed the plane information cards showing live flight data (flight number, altitude, airline) pulled from the Flightradar24 API.",
       "Solved inconsistent third-party flight data by iterating on API integration until payload parsing and display were reliable.",
