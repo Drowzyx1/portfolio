@@ -125,7 +125,7 @@ export const experience: Experience[] = [
     end: "Aug 2024",
     bullets: [
       "Designed and optimized a customer-facing web page — quote form and landing pages — resolving ~60 tickets in 3 months using TypeScript, JavaScript, React, and Next.js.",
-      "Implemented automated end-to-end testing with Playwright, cutting manual code review effort by 98%.",
+      "Implemented automated end-to-end (E2E) tests with Playwright for the quote form and main landing pages, catching unintended regressions before code review and eliminating the need to manually re-check those flows on every change.",
       "Integrated Castle.io and ZeroStep for fraud and bot detection, meeting industry compliance standards and stopping an active scam threat against the company.",
       "Collaborated with a ~25-person cross-functional team (Design, Product, QA) to improve user experience by 10% while maintaining code quality.",
       "Reduced customer-reported issues by 15% through user testing and black-box debugging of production issues.",
