@@ -28,6 +28,7 @@ export function PumpTrainerDetails() {
         </div>
       </section>
 
+      <div className="grid gap-x-14 gap-y-12 lg:grid-cols-2">
       <section aria-labelledby="pt-built">
         <h2 id="pt-built" className={sectionHeading}>
           How it was built
@@ -84,6 +85,7 @@ export function PumpTrainerDetails() {
         </details>
       </section>
 
+      <div className="space-y-12">
       <section aria-labelledby="pt-bugs">
         <h2 id="pt-bugs" className={sectionHeading}>
           Bugs found and fixed
@@ -125,6 +127,8 @@ export function PumpTrainerDetails() {
           ))}
         </ul>
       </section>
+      </div>
+      </div>
     </div>
   );
 }

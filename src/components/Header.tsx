@@ -5,7 +5,7 @@ import { NavMenu } from "@/components/NavMenu";
 export function Header() {
   return (
     <header className="border-b border-zinc-200 dark:border-zinc-800">
-      <div className="mx-auto flex max-w-3xl items-center justify-between px-6 py-4">
+      <div className="site-container flex items-center justify-between py-4">
         <div className="flex items-center gap-3">
           <Link href="/" className="whitespace-nowrap font-semibold tracking-tight">
             {profile.name}

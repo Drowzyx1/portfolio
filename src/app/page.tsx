@@ -10,11 +10,11 @@ export default function Home() {
       <HeroChat />
 
       {featured.length > 0 && (
-        <section className="mx-auto max-w-3xl px-6 pb-16">
+        <section className="site-container pb-16 lg:pb-24">
           <h2 className="animate-fade-in-up text-sm font-medium uppercase tracking-wide text-zinc-500 opacity-0">
             Featured work
           </h2>
-          <div className="mt-4 grid gap-4 sm:grid-cols-2">
+          <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 lg:gap-5">
             {featured.map((project, i) => (
               <ProjectCard key={project.slug} project={project} delay={80 + i * 60} />
             ))}

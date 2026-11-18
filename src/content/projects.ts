@@ -24,6 +24,8 @@ export type ProjectCategory = (typeof projectCategories)[number];
 export type Project = {
   slug: string;
   title: string;
+  // Shown as a badge on the project card, e.g. "2026" or "2024–2025".
+  year: string;
   tagline: string;
   description: string;
   tech: string[];
@@ -44,6 +46,7 @@ export const projects: Project[] = [
   {
     slug: "look-up-app",
     title: "LOOK UP App",
+    year: "2024–2025",
     tagline: "Senior design capstone — a mobile app that scans nearby planes on a 2D map or in AR by pointing your phone at the sky.",
     description:
       "A senior design capstone built with a 4-person student team over two semesters (fall 2024 – spring 2025) — a React Native mobile app that detects planes near the user and offers two ways to explore: a 2D map view, or an AR mode where the camera scans the sky and overlays live flight data once it identifies a plane in frame. Owned the front end for the 2D map experience: designing the UI, building the search and filter system in TypeScript, and designing the plane information cards. One of the bigger challenges was flight data reliability — after testing several providers, the team landed on the Flightradar24 API, and getting the payload parsed and displayed correctly took real iteration.",
@@ -67,6 +70,7 @@ export const projects: Project[] = [
   {
     slug: "learn-the-markets",
     title: "Learn the Markets",
+    year: "2024–2025",
     tagline: "Full-stack company website built and maintained for a four-person startup.",
     description:
       "A fully responsive company website for Learn the Markets, built in 2024–2025 with React, Tailwind CSS, and HTML. Owned the full lifecycle — requirements, UI/UX design, development, deployment — under a one-year contract, including a year of post-launch support.",
@@ -88,6 +92,7 @@ export const projects: Project[] = [
   {
     slug: "tournament-tracker",
     title: "Tournament Tracker",
+    year: "2026",
     tagline:
       "Full-stack expense/earnings tracker for card game trips and tournaments, with its own multi-user auth and database.",
     description:
@@ -111,6 +116,7 @@ export const projects: Project[] = [
   {
     slug: "poker-session-tracker",
     title: "Poker Session Tracker",
+    year: "2026",
     tagline:
       "Log buy-ins, rebuys, and cash-outs for a home poker game, with leaderboards and bankroll charts that sync live across the table.",
     description:
@@ -180,6 +186,7 @@ export const projects: Project[] = [
   {
     slug: "ai-video-maker",
     title: "AI Video Maker",
+    year: "2026",
     tagline:
       "Turns a topic into a finished vertical Short: Claude writes the script, then the app narrates, animates, and captions it.",
     description:
@@ -226,6 +233,7 @@ export const projects: Project[] = [
   {
     slug: "pump-station-trainer",
     title: "Pump Station Maintenance Trainer",
+    year: "2026",
     tagline:
       "A Unity training simulation: guide a trainee through replacing a clogged filter on a pump station, with a live checklist, mistake detection, and a run summary.",
     description:
@@ -274,11 +282,12 @@ export const projects: Project[] = [
         wide: true,
       },
     ],
-    featured: false,
+    featured: true,
   },
   {
     slug: "ai-guided-portfolio",
     title: "AI-Guided Portfolio",
+    year: "2026",
     tagline:
       "An AI chatbot layered on top of this portfolio that can talk about my work and navigate visitors to it.",
     description:

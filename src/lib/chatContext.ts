@@ -36,6 +36,7 @@ export function buildSystemPrompt(): string {
       [
         `- slug: ${p.slug}`,
         `  title: ${p.title}`,
+        `  built: ${p.year}`,
         `  tagline: ${p.tagline}`,
         `  description: ${p.description}`,
         `  tech: ${p.tech.join(", ")}`,
