@@ -69,7 +69,7 @@ export const projects: Project[] = [
     title: "Learn the Markets",
     tagline: "Full-stack company website built and maintained for a four-person startup.",
     description:
-      "A fully responsive company website for Learn the Markets, built with React, Tailwind CSS, and HTML. Owned the full lifecycle — requirements, UI/UX design, development, deployment — under a one-year contract, including a year of post-launch support.",
+      "A fully responsive company website for Learn the Markets, built in 2024–2025 with React, Tailwind CSS, and HTML. Owned the full lifecycle — requirements, UI/UX design, development, deployment — under a one-year contract, including a year of post-launch support.",
     tech: ["React", "Tailwind CSS", "HTML"],
     categories: ["Full-stack", "Front-end", "Client & team work"],
     showcases: ["Real client work", "+70% engagement", "Owned end to end"],
@@ -91,7 +91,7 @@ export const projects: Project[] = [
     tagline:
       "Full-stack expense/earnings tracker for card game trips and tournaments, with its own multi-user auth and database.",
     description:
-      "A full-stack web app for tracking expenses and earnings across card game trips and tournaments — grew out of running events at GEEK'D and wanting something better than a spreadsheet. Started as a single-file HTML prototype and rebuilt into a real multi-user app: each person signs up with their own email/password account and only ever sees their own trips, enforced at the API layer with a normalized schema (User → Trip → Transaction) so no one can see or edit someone else's data.",
+      "A full-stack web app built in 2026 for tracking expenses and earnings across card game trips and tournaments — grew out of running events at GEEK'D and wanting something better than a spreadsheet. Started as a single-file HTML prototype and rebuilt into a real multi-user app: each person signs up with their own email/password account and only ever sees their own trips, enforced at the API layer with a normalized schema (User → Trip → Transaction) so no one can see or edit someone else's data.",
     tech: ["Next.js", "TypeScript", "PostgreSQL", "Prisma", "NextAuth.js"],
     categories: ["Full-stack", "Data & APIs"],
     showcases: ["Full-stack", "Secure auth", "Database design"],
@@ -114,7 +114,7 @@ export const projects: Project[] = [
     tagline:
       "Log buy-ins, rebuys, and cash-outs for a home poker game, with leaderboards and bankroll charts that sync live across the table.",
     description:
-      "A poker session tracker built for a home game group, where every buy-in and cash-out gets logged and the whole table sees the same numbers. It has four views: Standings (leaderboard, running-profit chart, and playful superlatives like Chip Leader and Ice Cold), a Live game mode for tracking rebuys and cashing players out as they leave, Sessions for logging and editing past nights, and Players for individual profiles with bankroll charts and game logs. It's a single HTML file of vanilla JavaScript — no framework, no build step, and no chart library; the charts are hand-built SVG. Data syncs live across devices, so a rebuy logged on one phone shows up on everyone else's. The live demo runs on made-up players and games, so you can try everything without touching a real group's numbers.",
+      "A poker session tracker built in 2026 for a home game group, where every buy-in and cash-out gets logged and the whole table sees the same numbers. It has four views: Standings (leaderboard, running-profit chart, and playful superlatives like Chip Leader and Ice Cold), a Live game mode for tracking rebuys and cashing players out as they leave, Sessions for logging and editing past nights, and Players for individual profiles with bankroll charts and game logs. It's a single HTML file of vanilla JavaScript — no framework, no build step, and no chart library; the charts are hand-built SVG. Data syncs live across devices, so a rebuy logged on one phone shows up on everyone else's. The live demo runs on made-up players and games, so you can try everything without touching a real group's numbers.",
     tech: ["JavaScript", "HTML/CSS", "SVG", "Real-time sync"],
     categories: ["Front-end", "Data & APIs"],
     showcases: ["Live multi-device sync", "Custom SVG charts", "No framework"],
@@ -183,7 +183,7 @@ export const projects: Project[] = [
     tagline:
       "Turns a topic into a finished vertical Short: Claude writes the script, then the app narrates, animates, and captions it.",
     description:
-      "A desktop app for making faceless YouTube Shorts. Pick a channel type and a topic, and Claude writes a scene-by-scene script that you can edit, reorder, or rewrite. The app then narrates it with an AI voice and draws every frame itself: animated big text, emoji badges, counting numbers, bar charts, step diagrams, and photos, with word-by-word captions, a progress bar, and sound effects generated in code. The output is a 1080×1920 MP4 ready to upload. It runs locally from a double-click Mac app with a Streamlit interface, and can also be used from a phone on the same Wi-Fi behind a passcode. It's about 2,400 lines of Python, and the Claude API key never leaves the user's machine.",
+      "A desktop app built in 2026 for making faceless YouTube Shorts. Pick a channel type and a topic, and Claude writes a scene-by-scene script that you can edit, reorder, or rewrite. The app then narrates it with an AI voice and draws every frame itself: animated big text, emoji badges, counting numbers, bar charts, step diagrams, and photos, with word-by-word captions, a progress bar, and sound effects generated in code. The output is a 1080×1920 MP4 ready to upload. It runs locally from a double-click Mac app with a Streamlit interface, and can also be used from a phone on the same Wi-Fi behind a passcode. It's about 2,400 lines of Python, and the Claude API key never leaves the user's machine.",
     tech: ["Python", "Streamlit", "Claude API", "Pillow", "FFmpeg", "edge-tts"],
     categories: ["AI & LLMs", "Data & APIs"],
     showcases: ["AI scriptwriting", "Custom animation engine", "Desktop + phone"],
@@ -282,7 +282,7 @@ export const projects: Project[] = [
     tagline:
       "An AI chatbot layered on top of this portfolio that can talk about my work and navigate visitors to it.",
     description:
-      "This portfolio itself, built with Next.js, TypeScript, and Tailwind — but the interesting part is the guide chatbot running on the Claude API. It's given tool-use access to a navigate_to_project function, so it can route visitors to the right project page mid-conversation instead of just answering in text. The bot's knowledge comes straight from the same content files that power the rest of the site (profile.ts, projects.ts), so there's one source of truth instead of a separate FAQ to maintain. The API key never touches the browser — all calls go through a server-side route.",
+      "This portfolio itself, built in 2026 with Next.js, TypeScript, and Tailwind — but the interesting part is the guide chatbot running on the Claude API. It's given tool-use access to a navigate_to_project function, so it can route visitors to the right project page mid-conversation instead of just answering in text. The bot's knowledge comes straight from the same content files that power the rest of the site (profile.ts, projects.ts), so there's one source of truth instead of a separate FAQ to maintain. The API key never touches the browser — all calls go through a server-side route.",
     tech: ["TypeScript", "Next.js", "Tailwind CSS", "Claude API", "Tool use"],
     categories: ["AI & LLMs", "Full-stack", "Front-end"],
     showcases: ["LLM tool calling", "Secure server-side API"],
