@@ -316,7 +316,7 @@ export function SceneRecreation({
         )}
       </div>
 
-      <div className="mt-3 grid gap-3 sm:grid-cols-2">
+      <div className="mt-3 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
         {/* Access panel (Door) */}
         <div className={tileCls}>
           <button type="button" onClick={toggleDoor} className={btnCls}>

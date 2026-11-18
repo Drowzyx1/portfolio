@@ -13,12 +13,21 @@ export function ProjectCard({
     <Link
       href={`/projects/${project.slug}`}
       style={{ animationDelay: `${delay}ms` } as CSSProperties}
-      className="animate-fade-in-up block rounded-lg border border-zinc-200 p-4 opacity-0 transition-all duration-300 ease-out hover:-translate-y-1 hover:border-zinc-400 hover:shadow-lg hover:shadow-zinc-900/5 dark:border-zinc-800 dark:hover:border-zinc-600 dark:hover:shadow-black/30"
+      className="animate-fade-in-up block rounded-lg border border-zinc-200 p-4 opacity-0 lg:p-5 transition-all duration-300 ease-out hover:-translate-y-1 hover:border-zinc-400 hover:shadow-lg hover:shadow-zinc-900/5 dark:border-zinc-800 dark:hover:border-zinc-600 dark:hover:shadow-black/30"
     >
-      <h3 className="font-medium text-zinc-950 dark:text-zinc-50">
-        {project.title}
-      </h3>
-      <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">
+      <div className="flex items-start justify-between gap-3">
+        <h3 className="font-medium text-zinc-950 lg:text-lg dark:text-zinc-50">
+          {project.title}
+        </h3>
+        <span
+          title={`Built ${project.year}`}
+          className="mt-0.5 shrink-0 rounded-md border border-zinc-200 bg-zinc-50 px-1.5 py-0.5 font-mono text-[11px] leading-none text-zinc-500 dark:border-zinc-800 dark:bg-zinc-900/60 dark:text-zinc-400"
+        >
+          <span className="sr-only">Built </span>
+          {project.year}
+        </span>
+      </div>
+      <p className="mt-1 text-sm text-zinc-600 lg:text-[0.95rem] lg:leading-relaxed dark:text-zinc-400">
         {project.tagline}
       </p>
       {project.showcases && project.showcases.length > 0 && (

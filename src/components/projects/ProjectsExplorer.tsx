@@ -55,7 +55,7 @@ export function ProjectsExplorer({ projects }: { projects: Project[] }) {
         </p>
       </div>
 
-      <div className="mt-6 grid gap-4 sm:grid-cols-2">
+      <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 lg:gap-5 2xl:grid-cols-4">
         {projects.map((project, i) => {
           const isMatch = !!active && project.categories.includes(active);
           const isDimmed = !!active && !isMatch;

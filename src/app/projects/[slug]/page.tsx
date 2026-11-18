@@ -18,9 +18,11 @@ export default async function ProjectPage({
   if (!project) notFound();
 
   return (
-    <div className="mx-auto max-w-3xl px-6 py-16">
+    <div className="site-container py-16 lg:py-20">
+      <div className="grid gap-x-14 gap-y-8 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
+      <div>
       <div className="animate-fade-in-up opacity-0">
-        <h1 className="text-2xl font-semibold tracking-tight text-zinc-950 dark:text-zinc-50">
+        <h1 className="text-2xl font-semibold tracking-tight text-zinc-950 lg:text-3xl dark:text-zinc-50">
           {project.title}
         </h1>
         <p className="mt-1 text-zinc-600 dark:text-zinc-400">
@@ -43,14 +45,16 @@ export default async function ProjectPage({
       </div>
 
       <p
-        className="animate-fade-in-up mt-6 text-zinc-700 opacity-0 dark:text-zinc-300"
+        className="animate-fade-in-up mt-6 text-zinc-700 opacity-0 lg:text-lg lg:leading-relaxed dark:text-zinc-300"
         style={{ animationDelay: "140ms" }}
       >
         {project.description}
       </p>
+      </div>
 
+      <aside>
       <div className="animate-fade-in-up opacity-0" style={{ animationDelay: "200ms" }}>
-        <p className="mt-6 text-sm font-medium text-zinc-500">
+        <p className="text-sm font-medium text-zinc-500">
           Role: <span className="text-zinc-800 dark:text-zinc-200">{project.role}</span>
         </p>
 
@@ -89,6 +93,9 @@ export default async function ProjectPage({
         )}
       </div>
 
+      </aside>
+      </div>
+
       {project.slug === "pump-station-trainer" && <PumpTrainerDetails />}
 
       {project.images && project.images.length > 0 && (
@@ -99,7 +106,7 @@ export default async function ProjectPage({
           <h2 className="text-sm font-medium uppercase tracking-wide text-zinc-500">
             Screenshots
           </h2>
-          <div className="mt-4 gap-4 sm:columns-2">
+          <div className="mt-4 gap-4 sm:columns-2 xl:columns-3">
             {project.images.map((img) => (
               <figure
                 key={img.src}
@@ -124,7 +131,7 @@ export default async function ProjectPage({
                     alt={img.alt}
                     width={img.width}
                     height={img.height}
-                    sizes={img.wide ? "720px" : "(min-width: 768px) 360px, 100vw"}
+                    sizes={img.wide ? "(min-width: 1280px) 1200px, 100vw" : "(min-width: 1280px) 400px, (min-width: 768px) 50vw, 100vw"}
                     className={`h-auto w-full ${img.wide ? "min-w-[640px] sm:min-w-0" : ""}`}
                   />
                 </a>

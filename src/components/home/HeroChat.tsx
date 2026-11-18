@@ -26,7 +26,7 @@ export function HeroChat() {
 
   return (
     <section
-      className={`mx-auto flex w-full max-w-2xl flex-col px-6 pb-12 transition-[min-height,padding-top] duration-500 ${
+      className={`mx-auto flex w-full max-w-2xl flex-col px-6 lg:max-w-3xl pb-12 transition-[min-height,padding-top] duration-500 ${
         started ? "min-h-[45vh] justify-start pt-16" : "min-h-[70vh] justify-center"
       }`}
     >

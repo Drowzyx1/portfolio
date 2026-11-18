@@ -40,6 +40,26 @@ body {
   animation: fade-in-up 0.5s ease-out both;
 }
 
+/* One shared page width: roomy on large monitors, still a comfortable gutter on phones. */
+@utility site-container {
+  margin-inline: auto;
+  width: 100%;
+  max-width: 80rem;
+  padding-inline: 1.5rem;
+
+  @media (min-width: 1024px) {
+    padding-inline: 2.5rem;
+  }
+
+  @media (min-width: 1536px) {
+    max-width: 90rem;
+  }
+
+  @media (min-width: 1920px) {
+    max-width: 100rem;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .animate-fade-in-up {
     animation: none;
